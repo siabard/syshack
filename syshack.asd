@@ -10,5 +10,6 @@
   :components ((:file "package")
                (:file "syshack")
 	       (:file "asset_manager")
+	       (:file "entity")
 	       (:file "texture")
-	       (:file "game"))
+	       (:file "game")))

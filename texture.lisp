@@ -6,12 +6,6 @@
     (sdl2:destroy-texture texture)))
 
 
-;;;; safe close font
-(defun safe-close-font (font)
-  (when (autowrap:valid-p font)
-    (sdl2-ttf:close-font font)))
-
-
 ;;; load texture
 
 (defun load-texture (renderer path)

@@ -14,3 +14,7 @@
 	(sdl2:with-renderer (renderer win :flags '(:accelerated :targettexture :presentvsync))
 	  (let ((game (make-game "Game" win renderer)))
 	    (game/loop game)))))))
+
+
+(defun run ()
+  (sdl2:make-this-thread-main #'main))

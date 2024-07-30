@@ -1,11 +1,11 @@
 ;;;; Asset 을 관리하는 클래스
-(in-package #:syshash)
+(in-package #:syshack)
 
 (defclass <asset-manager> ()
   ((textures :accessor asset-manager-textures
-	     :initarg textures )
+	     :initarg :textures )
    (renderer :accessor asset-manager-renderer
-	     :initarg renderer)
+	     :initarg :renderer))
   (:documentation "Asset 관리체계"))
 
 

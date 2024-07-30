@@ -44,6 +44,7 @@
 	     (sdl2:render-clear renderer)
 	     (sdl2:render-present renderer)))
     (:quit ()
+	   (game/quit game)
 	   t)))
 
 
@@ -62,3 +63,12 @@
 
 (defmethod game/render (game)
   ())
+
+;; game 을 종료한다.
+;; 모든 리소스를 free 한다.
+(defgeneric game/quit (game)
+  (:documentation "quit game"))
+
+(defmethod game/quit ((game <game>))
+  (let* ((am (game-asset-manager game)))
+    (asset-manager/cleanup am)))
