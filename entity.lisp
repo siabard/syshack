@@ -21,10 +21,12 @@
 ;;;; entity 
 
 (defclass <entity> ()
-  ((id :accessor entity-id 
+  ((sequence :accessor entity-sequence
+	     :initform 0
+	     :allocation :class)
+   (id :accessor entity-id 
        :initarg :id
-       :initform 0
-       :allocation :class)
+       :initform 0)
    (tag :accessor entity-tag
 	:initarg :tag
 	:type string)
@@ -32,13 +34,15 @@
 	   :initarg :alive?
 	   :initform T
 	   :type boolean))
-   
-  (:documentation "Entity class"))
   
+  (:documentation "Entity class"))
+
 (defun make-entity (tag)
   (let* ((new-entity (make-instance '<entity>
 				    :tag tag))
-	 (id (entity-id new-entity)))
-    (setf (entity-id new-entity) (+ id 1))
+	 (sequence (entity-sequence new-entity))
+	 (next-seqnece (+ sequence 1)))
+    (setf (entity-sequence new-entity) next-seqnece)
+    (setf (entity-id new-entity) next-seqnece)
     new-entity))
 
