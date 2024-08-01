@@ -107,20 +107,20 @@
 
 ;;; 텍스트를 출력하는 기능
 ;;; 한글인 경우와 아스키에 따른 경우를 모두 계산할 것
-(defun draw-string (renderer x y texts &key (sx 1) (sy 1))
+(defun draw-string (renderer x y texts &key korean-bitmap-font ascii-bitmap-font (sx 1) (sy 1))
   (let* ((charcodes (mapcar #'char-code (coerce texts 'list)))
-	 (idx 0)
+	 (text-offset 0)
 	 (texture (sdl2:create-texture renderer
 				       sdl2:+pixelformat-rgba8888+
 				       sdl2-ffi:+sdl-textureaccess-target+
 				       16 16)))
     (sdl2:set-texture-blend-mode texture sdl2-ffi:+sdl-blendmode-blend+)
-
+    
     (dolist (charcode charcodes)
       (cond ((hangulp charcode)
 	     (cffi:with-foreign-pointer (pixels (* 16 16 4))
 	       (memset pixels 0 (* 16 16 4))
-	       (write-hangul-font-to-pointer (gethash "hangul" *loaded-images*)
+	       (write-hangul-font-to-pointer korean-bitmap-font
 					     pixels
 					     charcode)
 	       (sdl2:update-texture texture
@@ -131,20 +131,21 @@
 				    texture
 				    :source-rect (sdl2:make-rect 0 0 16 16)
 				    :dest-rect (multiple-value-bind (zx zy zw zh)
-						   (rect/logical->physical (+ x (* 16 idx))
+						   (rect/logical->physical (+ x text-offset)
 									   y
 									   16
 									   16
 									   :sx sx
 									   :sy sy)
-						   (sdl2:make-rect zx zy zw zh))
+						 (sdl2:make-rect zx zy zw zh))
 				    :angle 0
 				    :center (sdl2:make-point 0 0)
-				    :flip nil)))
+				    :flip nil)
+	       (setf text-offset (+ 16 text-offset))))
 	    ((asciip charcode)
 	     (cffi:with-foreign-pointer (pixels (* 8 16 4))
 	       (memset pixels 0 (* 8 16 4))
-	       (write-font-to-pointer (gethash "ascii" *loaded-images*)
+	       (write-font-to-pointer ascii-bitmap-font
 				      pixels
 				      charcode)
 	       (sdl2:update-texture texture
@@ -155,19 +156,18 @@
 				    texture
 				    :source-rect (sdl2:make-rect 0 0 8 16)
 				    :dest-rect (multiple-value-bind (zx zy zw zh)
-						   (rect/logical->physical (+ x (* 16 idx))
+						   (rect/logical->physical (+ x text-offset)
 									   y
-									   16
+									   8
 									   16
 									   :sx sx
 									   :sy sy)
-						  (sdl2:make-rect zx zy zw zh))
+						 (sdl2:make-rect zx zy zw zh))
 				    :angle 0
 				    :center (sdl2:make-point 0 0)
-				    :flip nil))))
-
-      (incf idx))
-    (sdl2:destroy-texture texture)))
+				    :flip nil)
+	       (setf text-offset (+ 8 text-offset))))))
+	 (sdl2:destroy-texture texture)))
 
 
 ;; 한글을 출력해보기

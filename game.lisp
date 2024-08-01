@@ -46,8 +46,7 @@
 	      (cond ((string= cate "font")
 		     (asset-manager/add-font am (cadr splited) (caddr splited)))
 		    (t
-		     nil))
-	      (format t "~a~%" cate)))
+		     nil))))
     (close in)))
     
 
@@ -94,10 +93,16 @@
 	 (fonts (asset-manager-fonts am))
 	 (ascii-bitmap-font (gethash "ascii" fonts))
 	 (korean-bitmap-font (gethash "korean" fonts)))
-    (when ascii-bitmap-font
-      (draw renderer ascii-bitmap-font))
-    (when korean-bitmap-font
-      (draw-hangul renderer korean-bitmap-font))))
+    (draw-hangul renderer korean-bitmap-font)
+    (draw-string renderer  32 32 "안녕하세요" 
+		 :korean-bitmap-font korean-bitmap-font
+		 :ascii-bitmap-font ascii-bitmap-font)
+    (draw-string renderer  32 48 "This is text" 
+		 :korean-bitmap-font korean-bitmap-font
+		 :ascii-bitmap-font ascii-bitmap-font)
+    (draw-string renderer  32 64 "한 / 영 혼합" 
+		 :korean-bitmap-font korean-bitmap-font
+		 :ascii-bitmap-font ascii-bitmap-font)))
 
 ;; game 을 종료한다.
 ;; 모든 리소스를 free 한다.
