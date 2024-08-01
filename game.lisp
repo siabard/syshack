@@ -9,6 +9,13 @@
 	 :initarg :name
 	 :type string
 	 :documentation "Game's name")
+   (current-scene :accessor game-name-current-scene
+		  :initarg :current-scene
+		  :type string
+		  :documentation "Game's current scene")
+   (scenes :accessor game-scenes
+	   :initarg :scenes
+	   :documentation "hash table of scenes")
    (asset-manager :accessor game-asset-manager
 		  :initarg :asset-manager
 		  :documentation "Asset Manager")
@@ -23,11 +30,14 @@
   (:documentation "Game object"))
 
 (defun make-game (name window renderer)
-  (let ((asset-manager (make-asset-manager renderer)))
+  (let* ((asset-manager (make-asset-manager renderer))
+	 (scenes (make-hash-table :test 'equal)))
     (make-instance '<game>
 		   :name name
 		   :window window
 		   :renderer renderer
+		   :scenes scenes
+		   :current-scene ""
 		   :asset-manager asset-manager)))
 
 

@@ -15,4 +15,5 @@
 	       (:file "hangul")
 	       (:file "bitmap_font")
 	       (:file "util")
+	       (:file "scene")
 	       (:file "game")))
