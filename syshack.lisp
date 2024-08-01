@@ -13,6 +13,7 @@
       (sdl2:with-window (win :title "Syshack" :flags '(:shown) :w width :h height)
 	(sdl2:with-renderer (renderer win :flags '(:accelerated :targettexture :presentvsync))
 	  (let ((game (make-game "Game" win renderer)))
+	    (game/init game "asset.txt")
 	    (game/loop game)))))))
 
 

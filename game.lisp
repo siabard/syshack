@@ -33,6 +33,32 @@
 
 ;; game 초기화 모듈 
 
+(defgeneric game/init (game path)
+  (:documentation "initailize game system with config file"))
+
+(defmethod game/init (game path)
+  (let* ((am (game-asset-manager game))
+	 (in (open path)))
+    (loop for line = (read-line in nil)
+	  while line do 
+	    (let* ((splited (cl-ppcre:split "\\s+" line))
+		   (cate (car splited)))
+	      (cond ((string= cate "font")
+		     (asset-manager/add-font am (cadr splited) (caddr splited)))
+		    (t
+		     nil))
+	      (format t "~a~%" cate)))
+    (close in)))
+    
+
+
+(defun file-io-test (path)
+  (let ((in (open path)))
+    (when in 
+      (loop for line = (read-line in nil)
+	    while line do (format t "~a~%" line))
+      (close in))))
+
 ;; game loop 모듈
 (defgeneric game/loop (game)
   (:documentation "EVENT LOOP"))
@@ -42,6 +68,7 @@
     (:idle ()
 	   (let* ((renderer (game-renderer game)))
 	     (sdl2:render-clear renderer)
+	     (game/render game)
 	     (sdl2:render-present renderer)))
     (:quit ()
 	   (game/quit game)
@@ -62,7 +89,15 @@
   (:documentation "render entity in game state"))
 
 (defmethod game/render (game)
-  ())
+  (let* ((renderer (game-renderer game))
+	 (am (game-asset-manager game))
+	 (fonts (asset-manager-fonts am))
+	 (ascii-bitmap-font (gethash "ascii" fonts))
+	 (korean-bitmap-font (gethash "korean" fonts)))
+    (when ascii-bitmap-font
+      (draw renderer ascii-bitmap-font))
+    (when korean-bitmap-font
+      (draw-hangul renderer korean-bitmap-font))))
 
 ;; game 을 종료한다.
 ;; 모든 리소스를 free 한다.
