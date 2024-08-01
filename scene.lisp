@@ -13,9 +13,7 @@
 	     :initform '())
    (added-entities :accessor scene-added-entities
 		   :initarg :added-entities
-		   :initform '())
-   (player :accessor scene-player
-	   :initarg :player)))
+		   :initform '())))
 
 
 ;; update

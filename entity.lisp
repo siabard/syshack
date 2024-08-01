@@ -30,6 +30,10 @@
    (tag :accessor entity-tag
 	:initarg :tag
 	:type string)
+   
+   (animation :accessor entity-animation
+	      :initarg animation
+	      :initform nil)
    (alive? :accessor entity-alive?
 	   :initarg :alive?
 	   :initform T
@@ -46,3 +50,9 @@
     (setf (entity-id new-entity) next-seqnece)
     new-entity))
 
+
+(defgeneric entity/add-animation (entity animation)
+  (:documentation "Add animation to entity"))
+
+(defmethod entity/add-animation (entity animation)
+  (setf (entity-animation entity) animation))

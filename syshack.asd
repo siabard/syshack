@@ -11,6 +11,7 @@
                (:file "syshack")
 	       (:file "asset_manager")
 	       (:file "entity")
+	       (:file "component")
 	       (:file "texture")
 	       (:file "hangul")
 	       (:file "bitmap_font")
