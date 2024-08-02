@@ -4,8 +4,12 @@
 (defclass <asset-manager> ()
   ((textures :accessor asset-manager-textures
 	     :initarg :textures)
+   (atlases :accessor asset-manager-atlas
+	    :initarg :atlases)
    (fonts :accessor asset-manager-fonts
 	  :initarg :fonts)
+   (animations :accessor asset-manager-animations
+	       :initarg :animations)
    (renderer :accessor asset-manager-renderer
 	     :initarg :renderer))
   (:documentation "Asset 관리체계"))
@@ -14,9 +18,13 @@
 ;;;; 생성하기
 (defun make-asset-manager (renderer)
   (let ((textures (make-hash-table :test 'equal))
+	(atlases (make-hash-table :test 'equal))
+	(animations (make-hash-table :test 'equal))
 	(fonts (make-hash-table :test 'equal)))
     (make-instance '<asset-manager>
 		   :textures textures
+		   :atlases atlases
+		   :animations animations
 		   :fonts fonts
 		   :renderer renderer)))
 
@@ -42,10 +50,14 @@
 
 (defmethod asset-manager/cleanup (asset-manager)
   (let ((textures (asset-manager-textures asset-manager))
+	(atlases (asset-manager-atlas asset-manager))
+	(animations (asset-manager-animations asset-manager))
 	(fonts (asset-manager-fonts asset-manager)))
     (loop for v being the hash-value in textures
-	  do (safe-delete-texture v))
+	  do (release-texture v))
     (clrhash textures)
+    (clrhash animations)
+    (clrhash atlases)
     (clrhash fonts)))
 
 
@@ -56,7 +68,7 @@
 (defmethod asset-manager/add-texture (asset-manager name path)
   (let* ((textures (asset-manager-textures asset-manager))
 	 (renderer (asset-manager-renderer asset-manager))
-	 (texture (load-texture renderer path)))
+	 (texture (make-texture renderer path)))
     (setf (gethash name textures) texture)))
 
 
@@ -67,3 +79,7 @@
 (defmethod asset-manager/add-font (asset-manager name path)
   (let* ((fonts (asset-manager-fonts asset-manager)))
     (setf (gethash name fonts) (imago:read-image path))))	 
+
+;;;; TODO Atlas 추가 
+
+;;;; TODO Animation 추가
