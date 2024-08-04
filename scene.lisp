@@ -16,6 +16,10 @@
 		   :initform '())))
 
 
+;; init scene
+(defgeneric scene/init (scene path)
+  (:documentation 
+
 ;; update
 (defgeneric scene/update (scene dt)
   (:documentation "Update scene with dt"))

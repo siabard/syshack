@@ -30,7 +30,9 @@
    (tag :accessor entity-tag
 	:initarg :tag
 	:type string)
-   
+   (name :accessor entity-name
+	 :initarg :name
+	 :type string)
    (animation :accessor entity-animation
 	      :initarg animation
 	      :initform nil)
@@ -41,8 +43,9 @@
   
   (:documentation "Entity class"))
 
-(defun make-entity (tag)
+(defun make-entity (tag name)
   (let* ((new-entity (make-instance '<entity>
+				    :name name
 				    :tag tag))
 	 (sequence (entity-sequence new-entity))
 	 (next-seqnece (+ sequence 1)))
