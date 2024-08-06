@@ -4,9 +4,9 @@
   ((name :accessor animation-name
 	 :initarg :name
 	 :type string)
-   (atlas-name :accessor animation-atlas-name
-	       :initarg :atlas-name
-	       :type string)
+   (texture-name :accessor animation-texture-name
+		 :initarg :texture-name
+		 :type string)
    (frames :accessor animation-frames
 	   :initarg :frames
 	   :initform '())

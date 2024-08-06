@@ -6,7 +6,7 @@
   :license  "Specify license here"
   :version "0.0.1"
   :serial t
-  :depends-on (#:sdl2 #:sdl2-image #:sdl2-mixer #:swank #:imago #:cl-ppcre)
+  :depends-on (#:sdl2 #:sdl2-image #:sdl2-mixer #:swank #:imago #:cl-ppcre #:cl-tiled)
   :components ((:file "package")
                (:file "syshack")
 	       (:file "asset_manager")
@@ -16,5 +16,7 @@
 	       (:file "hangul")
 	       (:file "bitmap_font")
 	       (:file "util")
+	       (:file "tiled")
 	       (:file "scene")
+	       (:file "scene_zelda")
 	       (:file "game")))

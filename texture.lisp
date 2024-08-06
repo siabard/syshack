@@ -2,7 +2,7 @@
 
 (defclass <ctexture> ()
   ((texture :accessor ctexture-texture
-	    :initarg :textrue)
+	    :initarg :texture)
    (w :accessor ctexture-w
       :initarg :w)
    (h :accessor ctexture-h 
@@ -14,9 +14,9 @@
    (col :accessor ctexture-col
 	:initarg :col)
    (row :accessor ctexture-row 
-	:initarg row)
+	:initarg :row)
    (atlas :accessor ctexture-atlas
-	  :initarg atlas 
+	  :initarg :atlas 
 	  :initform nil)))
 
 

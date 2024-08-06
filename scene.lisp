@@ -18,7 +18,7 @@
 
 ;; init scene
 (defgeneric scene/init (scene path)
-  (:documentation 
+  (:documentation "Scene 초기화"))
 
 ;; update
 (defgeneric scene/update (scene dt)

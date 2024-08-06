@@ -30,9 +30,9 @@
 
 ;;;; 애니메이션 animation 
 (defclass <canimation> ()
-  ((animation :accessor canimation-animation
-	      :initarg :animation
-	      :initform nil)
+  ((animations :accessor canimation-animations
+	       :initarg :animations
+	       :initform (make-hash-table :test 'equal))
    (current-frame :accessor canimation-current-frame
 		  :initarg :current-frame
 		  :initform 0)
@@ -42,3 +42,9 @@
    (repeat? :accessor canimation-repeat?
 	    :initarg :repeat?
 	    :initform nil)))
+
+
+;;;; state
+(defclass <cstate> ()
+  ((name :accessor state-name
+	 :initarg :name)))

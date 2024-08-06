@@ -52,9 +52,13 @@
     (loop for line = (read-line in nil)
 	  while line do 
 	    (let* ((splited (cl-ppcre:split "\\s+" line))
-		   (cate (car splited)))
+		   (cate (car splited))
+		   (name (cadr splited))
+		   (path (caddr splited)))
 	      (cond ((string= cate "font")
-		     (asset-manager/add-font am (cadr splited) (caddr splited)))
+		     (asset-manager/add-font am name path))
+		    ((string= cate "map")
+		     (asset-manager/add-gamemap am name path))
 		    (t
 		     nil))))
     (close in)))

@@ -5,6 +5,8 @@
 ;; main routine
 
 ;; SDL2 초기화
+(defparameter *game* nil)
+
 
 (defun main ()
   (let ((width 640)
@@ -13,6 +15,7 @@
       (sdl2:with-window (win :title "Syshack" :flags '(:shown) :w width :h height)
 	(sdl2:with-renderer (renderer win :flags '(:accelerated :targettexture :presentvsync))
 	  (let ((game (make-game "Game" win renderer)))
+	    (setf *game* game)
 	    (game/init game "asset.txt")
 	    (game/loop game)))))))
 
