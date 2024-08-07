@@ -1,3 +1,4 @@
+window 1024 768
 font ascii resources/font/ascii.png
 font korean resources/font/hangul.png
 map default resources/map/tiled.tmx

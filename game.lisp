@@ -9,7 +9,7 @@
 	 :initarg :name
 	 :type string
 	 :documentation "Game's name")
-   (current-scene :accessor game-name-current-scene
+   (current-scene :accessor game-current-scene
 		  :initarg :current-scene
 		  :type string
 		  :documentation "Game's current scene")
@@ -48,7 +48,9 @@
 
 (defmethod game/init (game path)
   (let* ((am (game-asset-manager game))
-	 (in (open path)))
+	 (in (open path))
+	 (zelda (scene/make-zelda game))
+	 (scenes (game-scenes game)))
     (loop for line = (read-line in nil)
 	  while line do 
 	    (let* ((splited (cl-ppcre:split "\\s+" line))
@@ -61,7 +63,9 @@
 		     (asset-manager/add-gamemap am name path))
 		    (t
 		     nil))))
-    (close in)))
+    (close in)
+    (setf (gethash "zelda" scenes) zelda)
+    (setf (game-current-scene game) "zelda")))
     
 
 
@@ -93,8 +97,11 @@
   (:documentation "update game state with delta time"))
 
 
-(defmethod game/update (game dt)
-  ())
+(defmethod game/update ((game <game>) dt)
+  (let* ((current-scene-name (game-current-scene game))
+	 (scenes (game-scenes game))
+	 (scene (gethash current-scene-name scenes)))
+    (scene/update dt)))
 
 
 ;; game을 rendering 한다.
@@ -106,7 +113,11 @@
 	 (am (game-asset-manager game))
 	 (fonts (asset-manager-fonts am))
 	 (ascii-bitmap-font (gethash "ascii" fonts))
-	 (korean-bitmap-font (gethash "korean" fonts)))
+	 (korean-bitmap-font (gethash "korean" fonts))
+	 (current-scene-name (game-current-scene game))
+	 (scenes (game-scenes game))
+	 (scene (gethash current-scene-name scenes)))
+    (scene/render scene)
     (draw-hangul renderer korean-bitmap-font)
     (draw-string renderer  32 32 "안녕하세요" 
 		 :korean-bitmap-font korean-bitmap-font

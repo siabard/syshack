@@ -11,11 +11,11 @@
 (defun make-entity-manager ()
   (make-instance '<entity-manager>))
 
-(defgeneric entity-manager/add-entity (entity-manager tag)
+(defgeneric entity-manager/add-entity (entity-manager tag name)
   (:documentation "add entity to entity-manager"))
 
-(defmethod entity-manager/add-entity ((entity-manager <entity-manager>) tag)
-  (let* ((new-entity (make-entity tag))
+(defmethod entity-manager/add-entity ((entity-manager <entity-manager>) tag name)
+  (let* ((new-entity (make-entity tag name))
 	 (entities (entity-manager-entities entity-manager)))
     (setf (entity-manager-entities entity-manager) (cons new-entity entities))))
 ;;;; entity 
