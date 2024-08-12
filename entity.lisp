@@ -17,7 +17,8 @@
 (defmethod entity-manager/add-entity ((entity-manager <entity-manager>) tag name)
   (let* ((new-entity (make-entity tag name))
 	 (entities (entity-manager-entities entity-manager)))
-    (setf (entity-manager-entities entity-manager) (cons new-entity entities))))
+    (setf (entity-manager-entities entity-manager) (cons new-entity entities))
+    new-entity))
 ;;;; entity 
 
 (defclass <entity> ()
@@ -34,8 +35,11 @@
 	 :initarg :name
 	 :type string)
    (animation :accessor entity-animation
-	      :initarg animation
+	      :initarg :animation
 	      :initform nil)
+   (position :accessor entity-position
+	     :initarg :position
+	     :initform nil)
    (alive? :accessor entity-alive?
 	   :initarg :alive?
 	   :initform T

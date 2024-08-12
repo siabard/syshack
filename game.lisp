@@ -61,6 +61,18 @@
 		     (asset-manager/add-font am name path))
 		    ((string= cate "map")
 		     (asset-manager/add-gamemap am name path))
+		    ((string= cate "bitmap")
+		     (asset-manager/add-texture am name path))
+		    ((string= cate "animation")
+		     (let* ((texture-name (nth 2 splited))
+			    (start-frame (nth 3 splited))
+			    (frame-length (nth 4 splited))
+			    (animation (make-animation 
+					name 
+					texture-name 
+					start-frame 
+					frame-length)))
+		       (asset-manager/add-animation am name animation)))
 		    (t
 		     nil))))
     (close in)

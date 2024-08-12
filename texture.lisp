@@ -70,3 +70,15 @@
     (progn
       (sdl2:free-surface surface)
       texture)))
+
+;;; 지정된 프레임에 해당하는 x y w h 를 돌려줌
+(defgeneric texture/get-frame-rect (ctexture frame)
+  (:documentation "return x y w h value for frame"))
+
+(defmethod texture/get-frame-rect ((ctexture <ctexture>) frame)
+  (let* ((atlas (ctexture-atlas ctexture)))
+    (cond ((> frame (length atlas))
+	   '(0 0 0 0))
+	  (t
+	   (aref atlas frame)))))
+	 

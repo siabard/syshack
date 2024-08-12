@@ -2,3 +2,6 @@ window 1024 768
 font ascii resources/font/ascii.png
 font korean resources/font/hangul.png
 map default resources/map/tiled.tmx
+bitmap player resources/bitmap/char.png 16 16
+animation moveleft player 0 3
+animation moveright player 13 3

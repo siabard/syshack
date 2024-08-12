@@ -10,6 +10,11 @@
       :initform 0)))
 
 
+(defun make-position-component (x y)
+  (make-instance '<cposition>
+		 :x x 
+		 :y y))
+
 ;;;; 크기 size
 (defclass <csize> ()
   ((w :accessor csize-w
@@ -18,6 +23,11 @@
    (h :accessor csize-h
       :initarg :h
       :initform 0)))
+
+(defun make-size-component (w h)
+  (make-instance '<csize>
+		 :w w
+		 :h h))
 
 ;;;; 이동 movement
 (defclass <cmovement> ()
@@ -28,11 +38,15 @@
       :initarg :y
       :initform 0)))
 
+(defun make-movement-component (x y)
+    (make-instance '<cmovement>
+		   :x x
+		   :y y))
+
 ;;;; 애니메이션 animation 
 (defclass <canimation> ()
   ((animations :accessor canimation-animations
-	       :initarg :animations
-	       :initform (make-hash-table :test 'equal))
+	       :initarg :animations))
    (current-frame :accessor canimation-current-frame
 		  :initarg :current-frame
 		  :initform 0)
@@ -40,11 +54,24 @@
 	   :initarg :ended?
 	   :initform nil)
    (repeat? :accessor canimation-repeat?
-	    :initarg :repeat?
-	    :initform nil)))
+	    :initarg :repeat?mO)
 
+
+(defun make-animation-component (repeat?)
+  (let* ((animations (make-hash-table :test 'equal)))
+    (make-instance '<canimation>
+		   :animations animations
+		   :current-frame 0
+		   :ended? nil
+		   :repeat? repeat?)))
+		 
+    
 
 ;;;; state
 (defclass <cstate> ()
   ((name :accessor state-name
 	 :initarg :name)))
+
+(defun mae-state-component (name)
+  (make-instance '<cstate>
+		 :name name))

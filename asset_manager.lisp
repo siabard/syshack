@@ -124,3 +124,9 @@
     (setf (gethash name gamemaps) (make-tiled-map asset-manager path))))
 
 ;;;; TODO Animation 추가
+(defgeneric asset-manager/add-animation (asset-manager name animation)
+  (:documentation "애니메이션을 ㅁsset Manager에 추가함"))
+
+(defmethod asset-manager/add-animation ((asset-manager <asset-manager> name animation))
+  (let* ((animations (assett-manager-animations asset-manager)))
+    (setf (gethash name animations) animation)))
