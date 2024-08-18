@@ -127,6 +127,6 @@
 (defgeneric asset-manager/add-animation (asset-manager name animation)
   (:documentation "애니메이션을 ㅁsset Manager에 추가함"))
 
-(defmethod asset-manager/add-animation ((asset-manager <asset-manager> name animation))
+(defmethod asset-manager/add-animation ((asset-manager <asset-manager>) name animation)
   (let* ((animations (assett-manager-animations asset-manager)))
     (setf (gethash name animations) animation)))

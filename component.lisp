@@ -39,14 +39,14 @@
       :initform 0)))
 
 (defun make-movement-component (x y)
-    (make-instance '<cmovement>
-		   :x x
-		   :y y))
+  (make-instance '<cmovement>
+		 :x x
+		 :y y))
 
 ;;;; 애니메이션 animation 
 (defclass <canimation> ()
   ((animations :accessor canimation-animations
-	       :initarg :animations))
+	       :initarg :animations)
    (current-frame :accessor canimation-current-frame
 		  :initarg :current-frame
 		  :initform 0)
@@ -54,8 +54,8 @@
 	   :initarg :ended?
 	   :initform nil)
    (repeat? :accessor canimation-repeat?
-	    :initarg :repeat?mO)
-
+	    :initarg :repeat?)))
+  
 
 (defun make-animation-component (repeat?)
   (let* ((animations (make-hash-table :test 'equal)))
@@ -64,8 +64,8 @@
 		   :current-frame 0
 		   :ended? nil
 		   :repeat? repeat?)))
-		 
-    
+
+
 
 ;;;; state
 (defclass <cstate> ()
