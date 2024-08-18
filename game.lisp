@@ -62,11 +62,13 @@
 		    ((string= cate "map")
 		     (asset-manager/add-gamemap am name path))
 		    ((string= cate "bitmap")
-		     (asset-manager/add-texture am name path))
+		     (let ((width (parse-integer (nth 3 splited)))
+			   (height (parse-integer (nth 4 splited))))
+		       (asset-manager/add-texture am name path width height)))
 		    ((string= cate "animation")
 		     (let* ((texture-name (nth 2 splited))
-			    (start-frame (nth 3 splited))
-			    (frame-length (nth 4 splited))
+			    (start-frame (parse-integer (nth 3 splited)))
+			    (frame-length (parse-integer (nth 4 splited)))
 			    (animation (make-animation 
 					name 
 					texture-name 
@@ -77,7 +79,8 @@
 		     nil))))
     (close in)
     (setf (gethash "zelda" scenes) zelda)
-    (setf (game-current-scene game) "zelda")))
+    (setf (game-current-scene game) "zelda")
+    (scene/init zelda "./resources/level/level1.txt")))
     
 
 
@@ -97,6 +100,7 @@
     (:idle ()
 	   (let* ((renderer (game-renderer game)))
 	     (sdl2:render-clear renderer)
+	     (game/update game 16)
 	     (game/render game)
 	     (sdl2:render-present renderer)))
     (:quit ()
@@ -113,7 +117,7 @@
   (let* ((current-scene-name (game-current-scene game))
 	 (scenes (game-scenes game))
 	 (scene (gethash current-scene-name scenes)))
-    (scene/update dt)))
+    (scene/update scene dt)))
 
 
 ;; game을 rendering 한다.

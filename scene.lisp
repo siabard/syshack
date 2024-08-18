@@ -7,13 +7,7 @@
    (game :accessor scene-game
 	 :initarg :game)
    (entity-manager :accessor scene-entity-manager
-		   :initarg :entity-manager)
-   (entities :accessor scene-entities
-	     :initarg :entities
-	     :initform '())
-   (added-entities :accessor scene-added-entities
-		   :initarg :added-entities
-		   :initform '())))
+		   :initarg :entity-manager)))
 
 
 ;; init scene
@@ -28,11 +22,7 @@
 (defmethod scene/update :after ((scene <scene>) dt)
   ;; entities 에서 삭제항목 지우고
   ;; 추가 entity append 하기
-  (let* ((entities (scene-entities scene))
-	 (added-entities (scene-added-entities scene))
-	 (filtered-entities (remove-if #'(lambda (e) (entity-alive? e)) entities)))
-    (setf (scene-entities scene) (append filtered-entities added-entities))
-    (setf (scene-added-entities scene) '())))
+  (entity-manager/update (scene-entity-manager scene)))
 	 
 
 ;; render 

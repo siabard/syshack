@@ -5,7 +5,10 @@
 (defclass <entity-manager> ()
   ((entities :accessor entity-manager-entities
 	     :initarg :entities
-	     :initform nil))
+	     :initform nil)
+   (added-entities :accessor entity-manager-added-entities
+		   :initarg :added-entities
+		   :initform nil))
   (:documentation "Entity Manager class"))
 
 (defun make-entity-manager ()
@@ -16,10 +19,35 @@
 
 (defmethod entity-manager/add-entity ((entity-manager <entity-manager>) tag name)
   (let* ((new-entity (make-entity tag name))
-	 (entities (entity-manager-entities entity-manager)))
-    (setf (entity-manager-entities entity-manager) (cons new-entity entities))
+	 (added-entities (entity-manager-added-entities entity-manager)))
+    (setf (entity-manager-added-entities entity-manager) (cons new-entity added-entities))
     new-entity))
 ;;;; entity 
+
+(defgeneric entity-manager/update (entity-manager)
+  (:documentation "update entities"))
+
+(defmethod entity-manager/update ((entity-manager <entity-manager>))
+  (setf (entity-manager-entities entity-manager)
+	(remove-if #'(lambda (entity) (not (entity-alive? entity)))
+		   (entity-manager-entities entity-manager)))
+  (let* ((added-entities (entity-manager-added-entities entity-manager)))
+    (setf (entity-manager-entities entity-manager) 
+	  (append (entity-manager-entities entity-manager)
+		  added-entities))
+    (setf (entity-manager-added-entities entity-manager) nil)))
+  
+
+(defgeneric entity-manager/get-entities (entity-manager tag)
+  (:documentation "retrieve entities"))
+
+(defmethod entity-manager/get-entities ((entity-manager <entity-manager>) tag)
+  (cond ((null tag)
+	 (entity-manager-entities entity-manager))
+	(t 
+	 (remove-if-not #'(lambda (entity)
+			    (string= (entity-name entity) tag))
+			(entity-manager-entities entity-manager)))))
 
 (defclass <entity> ()
   ((sequence :accessor entity-sequence

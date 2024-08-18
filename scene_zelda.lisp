@@ -25,6 +25,7 @@
 ;;;; 테스트를 위해 player를 먼저 만들어 등록한다.
 ;;;; 초기화하기 
 (defmethod scene/init ((scene <scene-zelda>) path)
+  (format t "zelda init")
   (let* ((gm (scene-game scene))
 	 (em (scene-entity-manager scene))
 	 (am (game-asset-manager gm))
@@ -37,14 +38,14 @@
 		     (let* ((entity-name (nth 1 splited))
 			    (entity-tag (nth 2 splited))
 			    (animation-name (nth 3 splited))
-			    (gx (nth 4 splited))
-			    (gy (nth 5 splited)))
+			    (gx (parse-integer (nth 4 splited)))
+			    (gy (parse-inteer (nth 5 splited))))
 		       (entity-manager/add-entity em entity-tag entity-name)))
 		    ((string= cate "player")
 		     (let* ((entity-name (nth 1 splited))
 			    (entity-tag (nth 2 splited))
-			    (gx (nth 3 splited))
-			    (gy (nth 4 splited))
+			    (gx (parse-integer (nth 3 splited)))
+			    (gy (parse-integer (nth 4 splited)))
 			    (position-component (make-position-component (* gx 16)
 									 (* gy 16)))
 			    (animations (asset-manager-animations am))
@@ -60,14 +61,25 @@
 		       (setf (entity-position player) position-component)))
 		    (t nil))))
     (close in)))
+
 ;;;; update 
 (defmethod scene/update ((scene <scene-zelda>) dt) 
-  ())
+  (let* ((entities (entity-manager/get-entities (scene-entity-manager scene) nil)))
+    (format t "~A~%" (length entities))))
 
 ;;;; render 
-						    
+;;; animation / position 항목이 있는 내역에 대해 출력처리						    
 (defmethod scene/render ((scene <scene-zelda>))
-  ()
-  )
+  (let* ((entities-animation-position 
+	   (remove-if-not 
+	    #'(lambda (entity)
+		(and 
+		 (entity-animation entity)
+		 (entity-position entity)))
+	    (entity-manager/get-entities (scene-entity-manager scene) nil))))
+    (loop for entity in entities-animation-position do
+      (format t "~A~%" (entity-position entity))
+      (format t "~A~%" (entity-animation entity))
+	  )))
 
 
