@@ -72,6 +72,6 @@
   ((name :accessor state-name
 	 :initarg :name)))
 
-(defun mae-state-component (name)
+(defun make-state-component (name)
   (make-instance '<cstate>
 		 :name name))
