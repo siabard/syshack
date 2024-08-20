@@ -50,6 +50,9 @@
    (current-frame :accessor canimation-current-frame
 		  :initarg :current-frame
 		  :initform 0)
+   (current-time :accessor canimation-current-time
+		 :initarg :current-time
+		 :initform 0)
    (current-animation :accessor canimation-current-animation
 		      :initarg :current-animation
 		      :initform nil)
