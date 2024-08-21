@@ -10,6 +10,7 @@
   :components ((:file "package")
                (:file "syshack")
 	       (:file "asset_manager")
+	       (:file "key")
 	       (:file "entity")
 	       (:file "animation")
 	       (:file "component")
