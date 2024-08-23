@@ -17,12 +17,12 @@
     (make-instance '<scene-zelda>
 		   :name "zelda"
 		   :game game
+		   :gamemap (make-hash-table :test 'equal)
 		   :camera camera
 		   :entity-manager em)))
 
 		 
   
-;;;; 테스트를 위해 player를 먼저 만들어 등록한다.
 ;;;; 초기화하기 
 (defmethod scene/init ((scene <scene-zelda>) path)
   (format t "zelda init")
@@ -39,8 +39,20 @@
 			    (entity-tag (nth 2 splited))
 			    (animation-name (nth 3 splited))
 			    (gx (parse-integer (nth 4 splited)))
-			    (gy (parse-inteer (nth 5 splited))))
-		       (entity-manager/add-entity em entity-tag entity-name)))
+			    (gy (parse-integer (nth 5 splited)))
+			    (position-component (make-position-component (* gx 16)
+									 (* gy 16)))
+			    (animations (asset-manager-animations am))
+			    (animation-component (make-animation-component T))
+			    (canimations (canimation-animations animation-component))
+			    (new-entity (entity-manager/add-entity em entity-tag entity-name)))
+		       (setf (gethash animation-name canimations) 
+			     (gethash animation-name animations))
+		       (setf (canimation-current-animation animation-component) animation-name)
+		       (setf (entity-animation new-entity) animation-component)
+		       (setf (entity-position new-entity) position-component)))
+		       
+		       
 		    ((string= cate "player")
 		     (let* ((entity-name (nth 1 splited))
 			    (entity-tag (nth 2 splited))
@@ -60,6 +72,12 @@
 		       (setf (canimation-current-animation animation-component) "moveleft")
 		       (setf (entity-animation player) animation-component)
 		       (setf (entity-position player) position-component)))
+		    ((string= cate "map")
+		     (let* ((map-name (nth 1 splited))
+			    (map-path (nth 2 splited))
+			    (game-map (make-tiled-map am map-path)))
+		       (setf (gethash map-name (scene-zelda-gamemap scene)) game-map)))
+		       
 		    (t nil))))
     (close in)))
 

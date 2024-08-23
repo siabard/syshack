@@ -1,1 +1,2 @@
 player player player 5 5
+map level1 resources/map/tiled.tmx

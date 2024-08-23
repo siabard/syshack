@@ -46,7 +46,7 @@
 	  :initarg :cam-x)
    (cam-y :accessor tiled-map-cam-y
 	  :initarg :cam-y)))
-   
+
 
 ;;;; cl-tiled:tileset 정보를 통해서 asset-manager의 map-textures 를 셋업하고
 ;;;; 인스탄스도 만들기 
@@ -72,7 +72,14 @@
 		  (height (cl-tiled:map-height map-data))
 		  (tile-width (cl-tiled:map-tile-width map-data))
 		  (tile-height (cl-tiled:map-tile-height map-data))
-		  (tileset-data (mapcar #'(lambda (tdata) (make-tileset-data asset-manager tdata)) tilesets)))
+		  (sorted-tilesets
+		    (sort tilesets
+			  #'>
+			  :key #'cl-tiled:tileset-first-gid))
+		  (tileset-data 
+		    (mapcar #'(lambda (tdata) 
+				(make-tileset-data asset-manager tdata))
+			    sorted-tilesets)))
 	     (make-instance '<tiled-map>
 			    :layers layers
 			    :tilesets tileset-data
@@ -80,5 +87,47 @@
 			    :tile-height tile-height
 			    :width width
 			    :height height))))))
-		       
 
+
+;; tile id 에 따라 tileset 을 돌려주기 
+;; tile atlas 는 각 texture의  atlas를 0부터 돌려준다.
+;; 그러니 tile id 가 0 이 아닌 경우라면 해당 tileset 의 first-gid 를 빼준 값이
+;; atlas 값이 된다. 
+;; tiledmap 객체의 tilesets 데이터는 first-gid 의 내림차순으로 정렬되어있다.
+
+
+(defun get-atlas-info (map tileid) 
+  (let* ((tilesets (tiled-map-tilesets map))
+	 (tilesets-contain-tileid 
+	   (find-if #'(lambda (tileset)
+			(let* ((first-gid (tileset-data-first-gid tileset)))
+			  (>= tileid first-gid)))
+		    tilesets)))
+    (values (- tileid (tileset-data-first-gid tilesets-contain-tileid))
+	    (tileset-data-texture-name tilesets-contain-tileid))))
+
+
+(defparameter *map-table* nil)
+(defparameter *current-map* nil)
+
+(defun set-map-table-from-game (game)
+  (setf *map-table* (get-map-from-game game)))
+
+(defun set-current-map (map-table map-key)
+  (setf *current-map* (gethash map-key map-table)))
+
+
+
+;; (set-map-table-from-game *game*)
+
+;; (set-current-map *map-table* "level1")
+
+;; (loop for v in (cl-tiled:layer-cells (car (cl-tiled:map-layers *tilemap*))) do 
+;;   (format t "~A~%" (cl-tiled:tile-id  (cl-tiled:cell-tile  v))))
+
+
+;; (format t "~A~%" (cl-tiled:map-tilesets *tilemap*))
+
+
+;; (format t "~A~%"
+;; 	(cl-tiled:tileset-first-gid (cadr (cl-tiled:map-tilesets *tilemap*))))
