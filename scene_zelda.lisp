@@ -157,6 +157,29 @@
 			     :angle 0
 			     :center (sdl2:make-point 0 0)
 			     :flip nil)
+	(scene-zelda/render-map scene)
 	  ))))
 
 
+
+
+(defun scene-zelda/render-map (scene-zelda)
+  (let* ((game (scene-game scene-zelda))
+	 (renderer (game-renderer game))
+	 (asset-manager (game-asset-manager game))
+	 (map-table (get-map-from-game game))
+	 (current-map (gethash "level1" map-table)))
+    (multiple-value-bind (index texture-name) 
+	(map-tile-info-map-texture current-map 6)
+      (multiple-value-bind (texture atlas)
+	  (get-map-texture-and-atlas asset-manager index texture-name)
+	(let* ((src-rect (list-to-sdl2-rect atlas))
+	       (dst-rect (sdl2:make-rect 0 0 32 32)))
+	  (sdl2:render-copy-ex renderer
+			       texture
+			       :source-rect src-rect 
+			       :dest-rect dst-rect
+			       :angle 0 
+			       :center (sdl2:make-point 0 0)
+			       :flip nil))))))
+	 

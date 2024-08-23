@@ -96,7 +96,10 @@
 ;; tiledmap 객체의 tilesets 데이터는 first-gid 의 내림차순으로 정렬되어있다.
 
 
-(defun get-atlas-info (map tileid) 
+
+;; asset manager / map-texture 의 키 값을 알아냈다.
+;; 그렇다면 이제 텍스쳐와 (x y w h)값을 알아낼 수 있음..
+(defun map-tile-info-map-texture (map tileid) 
   (let* ((tilesets (tiled-map-tilesets map))
 	 (tilesets-contain-tileid 
 	   (find-if #'(lambda (tileset)
@@ -105,6 +108,12 @@
 		    tilesets)))
     (values (- tileid (tileset-data-first-gid tilesets-contain-tileid))
 	    (tileset-data-texture-name tilesets-contain-tileid))))
+
+(defun get-map-texture-and-atlas (asset-manager index texture-name)
+  (let* ((map-texture (gethash texture-name (asset-manager-map-textures asset-manager)))
+	 (texture (ctexture-texture map-texture))
+	 (atlas (ctexture-atlas map-texture)))
+    (values texture (aref atlas index))))
 
 
 (defparameter *map-table* nil)
@@ -121,6 +130,10 @@
 ;; (set-map-table-from-game *game*)
 
 ;; (set-current-map *map-table* "level1")
+
+;; (get-atlas-info *current-map* 1)
+
+;; (get-map-texture-and-atals (game-asset-manager *game*)  0 "tilesheet")
 
 ;; (loop for v in (cl-tiled:layer-cells (car (cl-tiled:map-layers *tilemap*))) do 
 ;;   (format t "~A~%" (cl-tiled:tile-id  (cl-tiled:cell-tile  v))))
