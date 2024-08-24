@@ -19,6 +19,7 @@
 	       (:file "hangul")
 	       (:file "bitmap_font")
 	       (:file "util")
+	       (:file "gamemap")
 	       (:file "tiled")
 	       (:file "scene")
 	       (:file "scene_zelda")
