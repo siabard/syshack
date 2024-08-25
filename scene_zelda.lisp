@@ -21,8 +21,8 @@
 		   :camera camera
 		   :entity-manager em)))
 
-		 
-  
+
+
 ;;;; 초기화하기 
 (defmethod scene/init ((scene <scene-zelda>) path)
   (format t "zelda init")
@@ -51,8 +51,8 @@
 		       (setf (canimation-current-animation animation-component) animation-name)
 		       (setf (entity-animation new-entity) animation-component)
 		       (setf (entity-position new-entity) position-component)))
-		       
-		       
+		    
+		    
 		    ((string= cate "player")
 		     (let* ((entity-name (nth 1 splited))
 			    (entity-tag (nth 2 splited))
@@ -66,7 +66,7 @@
 			    (moveleft (gethash "moveleft" animations))
 			    (moveright (gethash "moveright" animations))
 			    (player (entity-manager/add-entity em entity-tag entity-name)))
-			    
+		       
 		       (setf (gethash "moveleft" canimations) moveleft)
 		       (setf (gethash "moveright" canimations) moveright)
 		       (setf (canimation-current-animation animation-component) "moveleft")
@@ -77,7 +77,7 @@
 			    (map-path (nth 2 splited))
 			    (game-map (make-tiled-map am map-path)))
 		       (setf (gethash map-name (scene-zelda-gamemap scene)) game-map)))
-		       
+		    
 		    (t nil))))
     (close in)))
 
@@ -116,9 +116,9 @@
 	      (t 
 	       (setf (canimation-current-time canimation)
 		     next-animation-current-time)))))))
-		
 
-	     
+
+
 
 
 ;;;; render 
@@ -151,14 +151,14 @@
 				       (cposition-y cposition)
 				       16 
 				       16)))
+	(scene-zelda/render-map scene)
 	(sdl2:render-copy-ex renderer texture-texture
 			     :source-rect src-rect
 			     :dest-rect dst-rect
 			     :angle 0
 			     :center (sdl2:make-point 0 0)
 			     :flip nil)
-	(scene-zelda/render-map scene)
-	  ))))
+	))))
 
 
 
@@ -170,25 +170,25 @@
 	 (map-table (get-map-from-game game))
 	 (current-map (gethash "level1" map-table))
 	 (camera (scene-zelda-camera scene-zelda))
-	 (layers (tiled-map-layers current-map))
-	 (top-layer (car layers))
-	 (cells (clip-layer-with-camera camera top-layer)))
-    (loop for cell in cells 
-	  do 
-	     (multiple-value-bind (index texture-name) 
-		 (map-tile-info-map-texture current-map 
-					    (+ 1 (cl-tiled:tile-id (cl-tiled:cell-tile cell))))
-	       (let* ((cell-column (cl-tiled:cell-column cell))
-		      (cell-row (cl-tiled:cell-row cell)))		 
-		 (multiple-value-bind (texture atlas)
-		     (get-map-texture-and-atlas asset-manager index texture-name)
-		   (let* ((src-rect (list-to-sdl2-rect atlas))
-			  (dst-rect (sdl2:make-rect (* 32 cell-column) (* 32 cell-row) 32 32)))
-		     (sdl2:render-copy-ex renderer
-					  texture
-					  :source-rect src-rect 
-					  :dest-rect dst-rect
-					  :angle 0 
-					  :center (sdl2:make-point 0 0)
-					  :flip nil))))))))
-    
+	 (layers (tiled-map-layers current-map)))
+    (loop for layer in layers 
+	  do (let* ((cells (clip-layer-with-camera camera layer)))
+	       (loop for cell in cells 
+		     do 
+			(multiple-value-bind (index texture-name) 
+			    (map-tile-info-map-texture current-map 
+						       (+ 1 (cl-tiled:tile-id (cl-tiled:cell-tile cell))))
+			  (let* ((cell-column (cl-tiled:cell-column cell))
+				 (cell-row (cl-tiled:cell-row cell)))		 
+			    (multiple-value-bind (texture atlas)
+				(get-map-texture-and-atlas asset-manager index texture-name)
+			      (let* ((src-rect (list-to-sdl2-rect atlas))
+				     (dst-rect (sdl2:make-rect (* 32 cell-column) (* 32 cell-row) 32 32)))
+				(sdl2:render-copy-ex renderer
+						     texture
+						     :source-rect src-rect 
+						     :dest-rect dst-rect
+						     :angle 0 
+						     :center (sdl2:make-point 0 0)
+						     :flip nil))))))))))
+
