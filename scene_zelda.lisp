@@ -170,25 +170,32 @@
 	 (map-table (get-map-from-game game))
 	 (current-map (gethash "level1" map-table))
 	 (camera (scene-zelda-camera scene-zelda))
-	 (layers (tiled-map-layers current-map)))
-    (loop for layer in layers 
+	 (layers (tiled-map-layers current-map))
+	 (layers-omit-collision (remove-if #'(lambda (layer)
+					       (string=
+						(cl-tiled:layer-name layer)
+						"collision"))
+					   layers)))
+    
+    (loop for layer in layers-omit-collision 
 	  do (let* ((cells (clip-layer-with-camera camera layer)))
 	       (loop for cell in cells 
-		     do 
-			(multiple-value-bind (index texture-name) 
-			    (map-tile-info-map-texture current-map 
-						       (+ 1 (cl-tiled:tile-id (cl-tiled:cell-tile cell))))
-			  (let* ((cell-column (cl-tiled:cell-column cell))
-				 (cell-row (cl-tiled:cell-row cell)))		 
-			    (multiple-value-bind (texture atlas)
-				(get-map-texture-and-atlas asset-manager index texture-name)
-			      (let* ((src-rect (list-to-sdl2-rect atlas))
-				     (dst-rect (sdl2:make-rect (* 32 cell-column) (* 32 cell-row) 32 32)))
-				(sdl2:render-copy-ex renderer
-						     texture
-						     :source-rect src-rect 
-						     :dest-rect dst-rect
-						     :angle 0 
-						     :center (sdl2:make-point 0 0)
-						     :flip nil))))))))))
-
+		     do (let* ((first-gid (cl-tiled:tileset-first-gid 
+				(cl-tiled:tile-tileset 
+				 (cl-tiled:cell-tile cell)))))
+			  (multiple-value-bind (index texture-name) 
+			      (map-tile-info-map-texture current-map 
+							 (+ first-gid (cl-tiled:tile-id (cl-tiled:cell-tile cell))))
+			    (let* ((cell-column (cl-tiled:cell-column cell))
+				   (cell-row (cl-tiled:cell-row cell)))		 
+			      (multiple-value-bind (texture atlas)
+				  (get-map-texture-and-atlas asset-manager index texture-name)
+				(let* ((src-rect (list-to-sdl2-rect atlas))
+				       (dst-rect (sdl2:make-rect (* 32 cell-column) (* 32 cell-row) 32 32)))
+				  (sdl2:render-copy-ex renderer
+						       texture
+						       :source-rect src-rect 
+						       :dest-rect dst-rect
+						       :angle 0 
+						       :center (sdl2:make-point 0 0)
+						       :flip nil)))))))))))
