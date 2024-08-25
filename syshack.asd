@@ -21,6 +21,7 @@
 	       (:file "util")
 	       (:file "gamemap")
 	       (:file "tiled")
+	       (:file "global")
 	       (:file "scene")
 	       (:file "scene_zelda")
 	       (:file "game")))

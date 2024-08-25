@@ -168,18 +168,27 @@
 	 (renderer (game-renderer game))
 	 (asset-manager (game-asset-manager game))
 	 (map-table (get-map-from-game game))
-	 (current-map (gethash "level1" map-table)))
-    (multiple-value-bind (index texture-name) 
-	(map-tile-info-map-texture current-map 6)
-      (multiple-value-bind (texture atlas)
-	  (get-map-texture-and-atlas asset-manager index texture-name)
-	(let* ((src-rect (list-to-sdl2-rect atlas))
-	       (dst-rect (sdl2:make-rect 0 0 32 32)))
-	  (sdl2:render-copy-ex renderer
-			       texture
-			       :source-rect src-rect 
-			       :dest-rect dst-rect
-			       :angle 0 
-			       :center (sdl2:make-point 0 0)
-			       :flip nil))))))
-	 
+	 (current-map (gethash "level1" map-table))
+	 (camera (scene-zelda-camera scene-zelda))
+	 (layers (tiled-map-layers current-map))
+	 (top-layer (car layers))
+	 (cells (clip-layer-with-camera camera top-layer)))
+    (loop for cell in cells 
+	  do 
+	     (multiple-value-bind (index texture-name) 
+		 (map-tile-info-map-texture current-map 
+					    (+ 1 (cl-tiled:tile-id (cl-tiled:cell-tile cell))))
+	       (let* ((cell-column (cl-tiled:cell-column cell))
+		      (cell-row (cl-tiled:cell-row cell)))		 
+		 (multiple-value-bind (texture atlas)
+		     (get-map-texture-and-atlas asset-manager index texture-name)
+		   (let* ((src-rect (list-to-sdl2-rect atlas))
+			  (dst-rect (sdl2:make-rect (* 32 cell-column) (* 32 cell-row) 32 32)))
+		     (sdl2:render-copy-ex renderer
+					  texture
+					  :source-rect src-rect 
+					  :dest-rect dst-rect
+					  :angle 0 
+					  :center (sdl2:make-point 0 0)
+					  :flip nil))))))))
+    

@@ -114,33 +114,3 @@
 	 (texture (ctexture-texture map-texture))
 	 (atlas (ctexture-atlas map-texture)))
     (values texture (aref atlas index))))
-
-
-(defparameter *map-table* nil)
-(defparameter *current-map* nil)
-
-(defun set-map-table-from-game (game)
-  (setf *map-table* (get-map-from-game game)))
-
-(defun set-current-map (map-table map-key)
-  (setf *current-map* (gethash map-key map-table)))
-
-
-
-;; (set-map-table-from-game *game*)
-
-;; (set-current-map *map-table* "level1")
-
-;; (get-atlas-info *current-map* 1)
-
-;; (get-map-texture-and-atals (game-asset-manager *game*)  0 "tilesheet")
-
-;; (loop for v in (cl-tiled:layer-cells (car (cl-tiled:map-layers *tilemap*))) do 
-;;   (format t "~A~%" (cl-tiled:tile-id  (cl-tiled:cell-tile  v))))
-
-
-;; (format t "~A~%" (cl-tiled:map-tilesets *tilemap*))
-
-
-;; (format t "~A~%"
-;; 	(cl-tiled:tileset-first-gid (cadr (cl-tiled:map-tilesets *tilemap*))))
