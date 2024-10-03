@@ -5,6 +5,7 @@
 (defparameter *current-layers* nil)
 (defparameter *current-scene* nil)
 (defparameter *current-camera* nil)
+(defparameter *current-game* nil)
 
 (defun set-map-table-from-game (game)
   (setf *map-table* (get-map-from-game game)))

@@ -10,7 +10,7 @@
 	   :initform nil)))
 
 
-;;;; 생성하기 
+;;;; 생성하기
 (defun scene/make-zelda (game)
   (let* ((em (make-entity-manager))
 	 (camera (make-camera "default" 0 0 640 480)))
@@ -23,7 +23,7 @@
 
 
 
-;;;; 초기화하기 
+;;;; 초기화하기
 (defmethod scene/init ((scene <scene-zelda>) path)
   (format t "zelda init")
   (let* ((gm (scene-game scene))
@@ -46,13 +46,13 @@
 			    (animation-component (make-animation-component T))
 			    (canimations (canimation-animations animation-component))
 			    (new-entity (entity-manager/add-entity em entity-tag entity-name)))
-		       (setf (gethash animation-name canimations) 
+		       (setf (gethash animation-name canimations)
 			     (gethash animation-name animations))
 		       (setf (canimation-current-animation animation-component) animation-name)
 		       (setf (entity-animation new-entity) animation-component)
 		       (setf (entity-position new-entity) position-component)))
-		    
-		    
+
+
 		    ((string= cate "player")
 		     (let* ((entity-name (nth 1 splited))
 			    (entity-tag (nth 2 splited))
@@ -66,7 +66,7 @@
 			    (moveleft (gethash "moveleft" animations))
 			    (moveright (gethash "moveright" animations))
 			    (player (entity-manager/add-entity em entity-tag entity-name)))
-		       
+
 		       (setf (gethash "moveleft" canimations) moveleft)
 		       (setf (gethash "moveright" canimations) moveright)
 		       (setf (canimation-current-animation animation-component) "moveleft")
@@ -77,12 +77,12 @@
 			    (map-path (nth 2 splited))
 			    (game-map (make-tiled-map am map-path)))
 		       (setf (gethash map-name (scene-zelda-gamemap scene)) game-map)))
-		    
+
 		    (t nil))))
     (close in)))
 
-;;;; update 
-(defmethod scene/update ((scene <scene-zelda>) dt) 
+;;;; update
+(defmethod scene/update ((scene <scene-zelda>) dt)
   (let* ((entities (entity-manager/get-entities (scene-entity-manager scene) nil)))
     (system/animation entities dt)))
 
@@ -95,7 +95,7 @@
 			      #'(lambda (entity)
 				  (entity-animation entity))
 			      entities)))
-    (loop for entity in animation-entities do 
+    (loop for entity in animation-entities do
       (let* ((canimation (entity-animation entity))
 	     (animations (canimation-animations canimation))
 	     (animation-current-animation-key (canimation-current-animation canimation))
@@ -113,7 +113,7 @@
 			(setf (canimation-current-frame canimation)
 			      animation-current-frame)))
 		 (setf (canimation-current-time canimation) 0)))
-	      (t 
+	      (t
 	       (setf (canimation-current-time canimation)
 		     next-animation-current-time)))))))
 
@@ -121,13 +121,13 @@
 
 
 
-;;;; render 
-;;; animation / position 항목이 있는 내역에 대해 출력처리						    
+;;;; render
+;;; animation / position 항목이 있는 내역에 대해 출력처리
 (defmethod scene/render ((scene <scene-zelda>))
-  (let* ((entities-animation-position 
-	   (remove-if-not 
+  (let* ((entities-animation-position
+	   (remove-if-not
 	    #'(lambda (entity)
-		(and 
+		(and
 		 (entity-animation entity)
 		 (entity-position entity)))
 	    (entity-manager/get-entities (scene-entity-manager scene) nil))))
@@ -147,9 +147,9 @@
 	     (texture-texture (ctexture-texture texture))
 	     (atlas (ctexture-atlas texture))
 	     (src-rect (list-to-sdl2-rect (aref atlas current-frame)))
-	     (dst-rect (sdl2:make-rect (cposition-x cposition)  
+	     (dst-rect (sdl2:make-rect (cposition-x cposition)
 				       (cposition-y cposition)
-				       16 
+				       16
 				       16)))
 	(scene-zelda/render-map scene)
 	(sdl2:render-copy-ex renderer texture-texture
@@ -176,26 +176,26 @@
 						(cl-tiled:layer-name layer)
 						"collision"))
 					   layers)))
-    
-    (loop for layer in layers-omit-collision 
+
+    (loop for layer in layers-omit-collision
 	  do (let* ((cells (clip-layer-with-camera camera layer)))
-	       (loop for cell in cells 
-		     do (let* ((first-gid (cl-tiled:tileset-first-gid 
-				(cl-tiled:tile-tileset 
+	       (loop for cell in cells
+		     do (let* ((first-gid (cl-tiled:tileset-first-gid
+				(cl-tiled:tile-tileset
 				 (cl-tiled:cell-tile cell)))))
-			  (multiple-value-bind (index texture-name) 
-			      (map-tile-info-map-texture current-map 
+			  (multiple-value-bind (index texture-name)
+			      (map-tile-info-map-texture current-map
 							 (+ first-gid (cl-tiled:tile-id (cl-tiled:cell-tile cell))))
 			    (let* ((cell-column (cl-tiled:cell-column cell))
-				   (cell-row (cl-tiled:cell-row cell)))		 
+				   (cell-row (cl-tiled:cell-row cell)))
 			      (multiple-value-bind (texture atlas)
 				  (get-map-texture-and-atlas asset-manager index texture-name)
 				(let* ((src-rect (list-to-sdl2-rect atlas))
 				       (dst-rect (sdl2:make-rect (* 32 cell-column) (* 32 cell-row) 32 32)))
 				  (sdl2:render-copy-ex renderer
 						       texture
-						       :source-rect src-rect 
+						       :source-rect src-rect
 						       :dest-rect dst-rect
-						       :angle 0 
+						       :angle 0
 						       :center (sdl2:make-point 0 0)
 						       :flip nil)))))))))))

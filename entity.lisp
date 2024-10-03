@@ -22,7 +22,7 @@
 	 (added-entities (entity-manager-added-entities entity-manager)))
     (setf (entity-manager-added-entities entity-manager) (cons new-entity added-entities))
     new-entity))
-;;;; entity 
+;;;; entity
 
 (defgeneric entity-manager/update (entity-manager)
   (:documentation "update entities"))
@@ -32,11 +32,11 @@
 	(remove-if #'(lambda (entity) (not (entity-alive? entity)))
 		   (entity-manager-entities entity-manager)))
   (let* ((added-entities (entity-manager-added-entities entity-manager)))
-    (setf (entity-manager-entities entity-manager) 
+    (setf (entity-manager-entities entity-manager)
 	  (append (entity-manager-entities entity-manager)
 		  added-entities))
     (setf (entity-manager-added-entities entity-manager) nil)))
-  
+
 
 (defgeneric entity-manager/get-entities (entity-manager tag)
   (:documentation "retrieve entities"))
@@ -44,7 +44,7 @@
 (defmethod entity-manager/get-entities ((entity-manager <entity-manager>) tag)
   (cond ((null tag)
 	 (entity-manager-entities entity-manager))
-	(t 
+	(t
 	 (remove-if-not #'(lambda (entity)
 			    (string= (entity-name entity) tag))
 			(entity-manager-entities entity-manager)))))
@@ -53,7 +53,7 @@
   ((sequence :accessor entity-sequence
 	     :initform 0
 	     :allocation :class)
-   (id :accessor entity-id 
+   (id :accessor entity-id
        :initarg :id
        :initform 0)
    (tag :accessor entity-tag
@@ -72,7 +72,7 @@
 	   :initarg :alive?
 	   :initform T
 	   :type boolean))
-  
+
   (:documentation "Entity class"))
 
 (defun make-entity (tag name)
@@ -91,3 +91,42 @@
 
 (defmethod entity/add-animation (entity animation)
   (setf (entity-animation entity) animation))
+
+
+;;; entity에서 현재 animation의 현재 프레임관련 animation 정보를
+;;; 반환한다.
+(defgeneric entity/get-current-frame-animation (entity)
+  (:documentation "해당 entity의 현재 애니메이션의 현재 프레임 반환"))
+
+(defmethod entity/get-current-frame-animation (entity)
+  (let* ((canimation (entity-animation entity))
+	 (current-frame (canimation-current-frame canimation))
+	 (animations (canimation-animations canimation))   ;; hash-table
+	 (current-animation (canimation-current-animation canimation)) ;; string
+	 (animation (gethash current-animation animations))) ;; <animation>
+    animation))
+
+
+;;; entity 에서 component를 통해 영역이 있는지 여부와
+;;; 해당 영역 정보를 가져오기
+;;; 해당 영역은 position 컴포넌트와 animation 으로 결정된다.
+(defgeneric entity/get-bound-rect (entity asset-manager)
+  (:documentation "entity 에 대한 bound 영역을 계산해서 알려준다.")
+
+;;; bound box는 rectangle 형태이어야한다.
+(defmethod entity/get-bound-rect (entity asset-manager)
+  (let* ((cposition (entity-position entity))
+	 (canimation (entity-animation entity))
+	 (current-frame (canimation-current-frame canimation))
+	 (animations (canimation-animations canimation))
+	 (current-animation (canimation-current-animation canimation))
+	 (animation (gethash current-animation animations))
+	 (texture-name (animation-texture-name animation))
+	 (texture-asset (asset-manager-textures asset-manager))
+	 (texture (gethash texture-asset texture-name))
+	 (atlas (ctexture-atlas texture))
+	 (current-frame-atlas (aref atlas current-frame)))
+    (make-rectangle :x (cposition-x cposition)
+		    :y (cposition-y cposition)
+		    :w (aref current-frame-atlas 2)
+		    :h (aref current-frame-atlas 3))))

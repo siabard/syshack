@@ -80,6 +80,7 @@
     (close in)
     (setf (gethash "zelda" scenes) zelda)
     (setf (game-current-scene game) "zelda")
+    (setf *current-scene* zelda)
     (scene/init zelda "./resources/level/level1.txt")))
     
 

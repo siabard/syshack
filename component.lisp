@@ -43,6 +43,29 @@
 		 :x x
 		 :y y))
 
+
+;;;; 키보드 입력에 대응하는 컴포넌트
+(defclass <cinput> ()
+  ((up :accessor cinput-up
+	:initarg :up
+	:initform nil)
+   (down :accessor cinput-down
+	 :initarg :down
+	 :initform nil)
+   (left :accessor cinput-left
+	 :initarg :left
+	 :initform nil)
+   (right :accessor cinput-right
+	  :initarg :right
+	  :initform nil)
+   (shoot :accessor cinput-shoot
+	  :initarg :shoot
+	  :initform nil)))
+
+
+(defun make-input-component ()
+  (make-instance '<cinput>))
+
 ;;;; 애니메이션 animation 
 (defclass <canimation> ()
   ((animations :accessor canimation-animations

@@ -76,6 +76,7 @@
     (loop for v being the hash-value in map-textures
 	  do (release-texture v))
     (clrhash textures)
+    (clrhash map-textures)
     (clrhash animations)
     (clrhash gamemaps)
     (clrhash atlases)

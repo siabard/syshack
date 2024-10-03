@@ -3,8 +3,8 @@
 ;; vec2 는 다음과 같다.
 ;; (make-vec2 x y)
 
-(defstruct vec2 
-  x 
+(defstruct vec2
+  x
   y)
 
 
@@ -27,12 +27,12 @@
 	 (h (rectangle-h r)))
     (values (+ x (/ w 2))
 	    (+ y (/ h 2)))))
-	 
+
 
 ;; 한 rectangle과 또 다른 rectangle이 겹쳐진 위치를 구한다.
 ;; 겹쳐진 위치는 (x y) 같은 형식으로 구해진다.
 
-(defun overlap-amount (r1 r2) 
+(defun overlap-amount (r1 r2)
   (let* ((c1 (rectangle-center r1))
 	 (c2 (rectangle-center r2))
 	 (delta (vec2-delta c1 c2))
@@ -43,7 +43,7 @@
 		   (/ (rectangle-h r2) 2))
 		(vec2-y delta))))
     (make-vec2 :x ox :y oy)))
-	 
+
 
 ;; vec2인 pos을 중점으로 둔 w x h 사각형
 (defun get-bound-rect (pos w h)
@@ -54,4 +54,4 @@
 		    :w w
 		    :h h)))
 
-;; 
+;;
