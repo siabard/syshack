@@ -111,7 +111,7 @@
 ;;; 해당 영역 정보를 가져오기
 ;;; 해당 영역은 position 컴포넌트와 animation 으로 결정된다.
 (defgeneric entity/get-bound-rect (entity asset-manager)
-  (:documentation "entity 에 대한 bound 영역을 계산해서 알려준다.")
+  (:documentation "entity 에 대한 bound 영역을 계산해서 알려준다."))
 
 ;;; bound box는 rectangle 형태이어야한다.
 (defmethod entity/get-bound-rect (entity asset-manager)
