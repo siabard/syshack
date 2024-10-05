@@ -23,6 +23,8 @@
 	     :initarg :renderer
 	     :initform nil
 	     :documentation "Game's window renderer")
+   (key-input :accessor game-key-input
+	      :initarg :key-input)
    (window :accessor game-window
 	   :initarg :window
 	   :initform nil
@@ -31,11 +33,13 @@
 
 (defun make-game (name window renderer)
   (let* ((asset-manager (make-asset-manager renderer))
+	 (key-input (make-key-input))
 	 (scenes (make-hash-table :test 'equal)))
     (make-instance '<game>
 		   :name name
 		   :window window
 		   :renderer renderer
+		   :key-input key-input
 		   :scenes scenes
 		   :current-scene ""
 		   :asset-manager asset-manager)))
@@ -81,6 +85,7 @@
     (setf (gethash "zelda" scenes) zelda)
     (setf (game-current-scene game) "zelda")
     (setf *current-scene* zelda)
+    (init-keys (game-key-input game))
     (scene/init zelda "./resources/level/level1.txt")))
     
 
@@ -99,10 +104,14 @@
 (defmethod game/loop (game)
   (let* ((start-tick (sdl2:get-ticks))
 	 (end-tick (sdl2:get-ticks))
-	 (dt (- end-tick start-tick)))
+	 (dt (- end-tick start-tick))
+	 (key-input (game-key-input game)))
     (sdl2:with-event-loop (:method :poll)
       (:idle ()
-	     (let* ((renderer (game-renderer game)))
+	     (let* ((renderer (game-renderer game))
+		    (key-input (game-key-input game)))
+	       (when (key-pressed-p key-input (sdl2:scancode-key-to-value :scancode-escape))
+		 (sdl2:push-event :quit))
 	       (setf start-tick (sdl2:get-ticks))
 	       (setf dt (- start-tick end-tick))
 	       (setf end-tick start-tick)
@@ -110,8 +119,13 @@
 	       (game/update game dt)
 	       (game/render game)
 	       (sdl2:render-present renderer)
-	       (when (< dt 2)
-		 (sdl2:delay (- 2 dt)))))
+	       (clear-keys key-input)
+	       (when (< dt 16)
+		 (sdl2:delay (- 16 dt)))))
+      (:keyup (:keysym keysym)
+	      (keyup-event key-input (sdl2:scancode-value keysym)))
+      (:keydown (:keysym keysym)
+		(keydown-event key-input (sdl2:scancode-value keysym)))
       (:quit ()
 	     (game/quit game)
 	     t))))
