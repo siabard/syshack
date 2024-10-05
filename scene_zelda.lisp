@@ -141,16 +141,43 @@
 	     (texture-name (animation-texture-name animation))
 	     (game (scene-game scene))
 	     (renderer (game-renderer game))
+	     (camera (scene-zelda-camera scene))
+	     (camera-rectangle (get-camera-rectangle camera))
 	     (asset-manager (game-asset-manager game))
 	     (texture-asset (asset-manager-textures asset-manager))
 	     (texture (gethash texture-name texture-asset))
 	     (texture-texture (ctexture-texture texture))
-	     (atlas (ctexture-atlas texture))
-	     (src-rect (list-to-sdl2-rect (aref atlas current-frame)))
-	     (dst-rect (sdl2:make-rect (cposition-x cposition)
-				       (cposition-y cposition)
-				       16
-				       16)))
+	     (t-atlas (ctexture-atlas texture))
+	     (atlas (aref t-atlas current-frame))
+	     (atlas-x (car atlas))
+	     (atlas-y (cadr atlas))
+	     (atlas-w (caddr atlas))
+	     (atlas-h (cadddr atlas))
+	     (clipped-src-rectangle 
+	       (clip-rect-src
+		(make-rectangle :x (cposition-x cposition)
+				:y (cposition-y cposition)
+				:w atlas-w
+				:h atlas-h)
+		camera-rectangle))
+	     (src-rect (sdl2:make-rect 
+			(+ atlas-x
+			   (rectangle-x clipped-src-rectangle))
+			(+ atlas-y 
+			   (rectangle-y clipped-src-rectangle))
+			(rectangle-w clipped-src-rectangle) 
+			(rectangle-h clipped-src-rectangle)))
+	     (dst-rect (sdl2:make-rect (+ 
+					(- (cposition-x cposition)
+					   (camera-x camera))
+					(- atlas-w (rectangle-w clipped-src-rectangle)))
+				       (+
+					(- (cposition-y cposition)
+					   (camera-y camera))
+					(- atlas-h (rectangle-h clipped-src-rectangle)))
+				       (rectangle-w clipped-src-rectangle) 
+				       (rectangle-h clipped-src-rectangle))))
+	
 	(scene-zelda/render-map scene)
 	(sdl2:render-copy-ex renderer texture-texture
 			     :source-rect src-rect
