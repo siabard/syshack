@@ -31,3 +31,9 @@
 		  (camera-y camera)
 		  (camera-w camera)
 		  (camera-h camera)))
+
+(defun get-camera-rectangle (camera)
+  (make-rectangle :x (camera-x camera)
+		  :y (camera-y camera)
+		  :w (camera-w camera)
+		  :h (camera-h camera)))

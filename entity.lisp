@@ -100,12 +100,26 @@
 
 (defmethod entity/get-current-frame-animation (entity)
   (let* ((canimation (entity-animation entity))
-	 (current-frame (canimation-current-frame canimation))
 	 (animations (canimation-animations canimation))   ;; hash-table
 	 (current-animation (canimation-current-animation canimation)) ;; string
 	 (animation (gethash current-animation animations))) ;; <animation>
     animation))
 
+(defgeneric entity/get-current-animation-atlas (entity asset-manager)
+  (:documentation "해당 entity 의 현재 애니메이션의 atlas 값"))
+
+(defmethod entity/get-current-animation-atlas (entity asset-manager)
+  (let* ((canimation (entity-animation entity))
+	 (current-frame (canimation-current-frame canimation))
+	 (animations (canimation-animations canimation))   ;; hash-table
+	 (current-animation (canimation-current-animation canimation)) ;; string
+	 (animation (gethash current-animation animations)) ;; <animation>
+	 (texture-name (animation-texture-name animation))
+	 (texture-asset (asset-manager-textures asset-manager))
+	 (texture (gethash texture-asset texture-name))
+	 (atlas (ctexture-atlas texture))
+	 (current-frame-atlas (aref atlas current-frame)))
+    current-frame-atlas))
 
 ;;; entity 에서 component를 통해 영역이 있는지 여부와
 ;;; 해당 영역 정보를 가져오기
@@ -116,16 +130,7 @@
 ;;; bound box는 rectangle 형태이어야한다.
 (defmethod entity/get-bound-rect (entity asset-manager)
   (let* ((cposition (entity-position entity))
-	 (canimation (entity-animation entity))
-	 (current-frame (canimation-current-frame canimation))
-	 (animations (canimation-animations canimation))
-	 (current-animation (canimation-current-animation canimation))
-	 (animation (gethash current-animation animations))
-	 (texture-name (animation-texture-name animation))
-	 (texture-asset (asset-manager-textures asset-manager))
-	 (texture (gethash texture-asset texture-name))
-	 (atlas (ctexture-atlas texture))
-	 (current-frame-atlas (aref atlas current-frame)))
+	 (current-frame-atlas (entity/get-current-animation-atlas entity asset-manager)))
     (make-rectangle :x (cposition-x cposition)
 		    :y (cposition-y cposition)
 		    :w (aref current-frame-atlas 2)

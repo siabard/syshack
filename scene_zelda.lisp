@@ -13,7 +13,7 @@
 ;;;; 생성하기
 (defun scene/make-zelda (game)
   (let* ((em (make-entity-manager))
-	 (camera (make-camera "default" 0 0 640 480)))
+	 (camera (make-camera "default" 16 16 640 480)))
     (make-instance '<scene-zelda>
 		   :name "zelda"
 		   :game game
@@ -170,6 +170,7 @@
 	 (map-table (get-map-from-game game))
 	 (current-map (gethash "level1" map-table))
 	 (camera (scene-zelda-camera scene-zelda))
+	 (camera-rectangle (get-camera-rectangle camera))
 	 (layers (tiled-map-layers current-map))
 	 (layers-omit-collision (remove-if #'(lambda (layer)
 					       (string=
@@ -181,17 +182,38 @@
 	  do (let* ((cells (clip-layer-with-camera camera layer)))
 	       (loop for cell in cells
 		     do (let* ((first-gid (cl-tiled:tileset-first-gid
-				(cl-tiled:tile-tileset
-				 (cl-tiled:cell-tile cell)))))
+					   (cl-tiled:tile-tileset
+					    (cl-tiled:cell-tile cell)))))
 			  (multiple-value-bind (index texture-name)
 			      (map-tile-info-map-texture current-map
-							 (+ first-gid (cl-tiled:tile-id (cl-tiled:cell-tile cell))))
+							 (+ first-gid 
+							    (cl-tiled:tile-id 
+							     (cl-tiled:cell-tile cell))))
 			    (let* ((cell-column (cl-tiled:cell-column cell))
 				   (cell-row (cl-tiled:cell-row cell)))
 			      (multiple-value-bind (texture atlas)
 				  (get-map-texture-and-atlas asset-manager index texture-name)
-				(let* ((src-rect (list-to-sdl2-rect atlas))
-				       (dst-rect (sdl2:make-rect (* 32 cell-column) (* 32 cell-row) 32 32)))
+				(let* ((clipped-src-rectangle (clip-rect-src 
+							       (make-rectangle :x (* 32 cell-column)
+									       :y (* 32 cell-row)
+									       :w 32
+									       :h 32)
+							       camera-rectangle))
+				       (src-rect (sdl2:make-rect 
+						  (+ (car atlas) (rectangle-x clipped-src-rectangle))
+						  (+ (cadr atlas) (rectangle-y clipped-src-rectangle))
+						  (rectangle-w clipped-src-rectangle) 
+						  (rectangle-h clipped-src-rectangle)))
+				       (dst-rect (sdl2:make-rect (+ 
+								  (- (* 32 cell-column)
+								     (camera-x camera))
+								  (- 32 (rectangle-w clipped-src-rectangle)))
+								 (+
+								  (- (* 32 cell-row)
+								     (camera-y camera))
+								  (- 32 (rectangle-h clipped-src-rectangle)))
+								 (rectangle-w clipped-src-rectangle) 
+								 (rectangle-h clipped-src-rectangle))))
 				  (sdl2:render-copy-ex renderer
 						       texture
 						       :source-rect src-rect
