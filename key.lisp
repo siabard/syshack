@@ -79,4 +79,15 @@
   (let ((held (slot-value keys 'held)))
     (gethash scancode held nil)))
 
+
+(defgeneric quit-keys (keys)
+  (:documentation "clear all state of keys"))
+
+(defmethod quit-keys (keys)
+  (clrhash (slot-value keys 'held))
+  (clrhash (slot-value keys 'pressed))
+  (clrhash (slot-value keys 'released)))
+
+
 ;; //END OF KEY related function
+

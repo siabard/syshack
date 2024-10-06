@@ -45,6 +45,10 @@
 
 
 ;;;; 키보드 입력에 대응하는 컴포넌트
+;;;; cinput 의 각 기능은 boolean 값이다
+;;;; 키가 눌리면(pressed) -> T
+;;;; 키가 놓이면(released) -> F
+
 (defclass <cinput> ()
   ((up :accessor cinput-up
 	:initarg :up
@@ -65,6 +69,7 @@
 
 (defun make-input-component ()
   (make-instance '<cinput>))
+
 
 ;;;; 애니메이션 animation 
 (defclass <canimation> ()

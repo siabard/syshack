@@ -40,3 +40,23 @@
 (defmethod scene/register-action (scene code name)
   (let ((actionmap (scene-actionmap scene)))
     (setf (gethash code actionmap) name)))
+
+
+;; action 실행하기 
+(defgeneric scene/do-action (scene code act)
+  (:documentation "각 Scene에 CAction 전달"))
+
+(defmethod scene/do-action ((scene <scene>) code act)
+  (let* ((actionmap (scene-actionmap scene))
+	 (caction (gethash code actionmap)))
+    (when (not (null caction))
+      (cond ((string= (caction-act caction) "START")
+	     (cond ((string= (caction-name caction) "LEFT")
+		    (format t "MOVE LEFT~%"))
+		   ((string= (caction-name caction) "RIGHT")
+		    (format t "MOVE RIGHT~%"))))
+	    ((string= (caction-act caction) "STOP")
+	     (cond ((string= (caction-name caction) "LEFT")
+		    (format t "STOP LEFT~%"))
+		   ((string= (caction-name caction) "RIGHT")
+		    (format t "STOP RIGHT~%"))))))))

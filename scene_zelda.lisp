@@ -65,13 +65,18 @@
 			    (canimations (canimation-animations animation-component))
 			    (moveleft (gethash "moveleft" animations))
 			    (moveright (gethash "moveright" animations))
+			    (input (make-input-component))
+			    (movement (make-movement-component 0 0))
 			    (player (entity-manager/add-entity em entity-tag entity-name)))
 
+		       (setf (scene-zelda-player scene) player)
 		       (setf (gethash "moveleft" canimations) moveleft)
 		       (setf (gethash "moveright" canimations) moveright)
 		       (setf (canimation-current-animation animation-component) "moveleft")
 		       (setf (entity-animation player) animation-component)
-		       (setf (entity-position player) position-component)))
+		       (setf (entity-movement player) movement)
+		       (setf (entity-input player) input)
+		       (setf (entity-position player) position-component)))		  
 		    ((string= cate "map")
 		     (let* ((map-name (nth 1 splited))
 			    (map-path (nth 2 splited))
@@ -79,10 +84,16 @@
 		       (setf (gethash map-name (scene-zelda-gamemap scene)) game-map)))
 
 		    (t nil))))
+    (scene/register-action scene 80 "LEFT")
+    (scene/register-action scene 79 "RIGHT")
+    (scene/register-action scene 81 "DOWN")
+    (scene/register-action scene 82 "UP")
     (close in)))
 
 ;;;; update
 (defmethod scene/update ((scene <scene-zelda>) dt)
+  (scene-zelda/do-input scene)
+  (scene-zelda/do-movement scene dt)
   (let* ((entities (entity-manager/get-entities (scene-entity-manager scene) nil)))
     (system/animation entities dt)))
 
@@ -153,31 +164,31 @@
 	     (atlas-y (cadr atlas))
 	     (atlas-w (caddr atlas))
 	     (atlas-h (cadddr atlas))
-	     (clipped-src-rectangle 
+	     (clipped-src-rectangle
 	       (clip-rect-src
 		(make-rectangle :x (cposition-x cposition)
 				:y (cposition-y cposition)
 				:w atlas-w
 				:h atlas-h)
 		camera-rectangle))
-	     (src-rect (sdl2:make-rect 
+	     (src-rect (sdl2:make-rect
 			(+ atlas-x
 			   (rectangle-x clipped-src-rectangle))
-			(+ atlas-y 
+			(+ atlas-y
 			   (rectangle-y clipped-src-rectangle))
-			(rectangle-w clipped-src-rectangle) 
+			(rectangle-w clipped-src-rectangle)
 			(rectangle-h clipped-src-rectangle)))
-	     (dst-rect (sdl2:make-rect (+ 
-					(- (cposition-x cposition)
-					   (camera-x camera))
-					(- atlas-w (rectangle-w clipped-src-rectangle)))
-				       (+
-					(- (cposition-y cposition)
-					   (camera-y camera))
-					(- atlas-h (rectangle-h clipped-src-rectangle)))
-				       (rectangle-w clipped-src-rectangle) 
+	     (dst-rect (sdl2:make-rect (floor (+
+					       (- (cposition-x cposition)
+						  (camera-x camera))
+					       (- atlas-w (rectangle-w clipped-src-rectangle))))
+				       (floor (+
+					       (- (cposition-y cposition)
+						  (camera-y camera))
+					       (- atlas-h (rectangle-h clipped-src-rectangle))))
+				       (rectangle-w clipped-src-rectangle)
 				       (rectangle-h clipped-src-rectangle))))
-	
+
 	(scene-zelda/render-map scene)
 	(sdl2:render-copy-ex renderer texture-texture
 			     :source-rect src-rect
@@ -213,25 +224,25 @@
 					    (cl-tiled:cell-tile cell)))))
 			  (multiple-value-bind (index texture-name)
 			      (map-tile-info-map-texture current-map
-							 (+ first-gid 
-							    (cl-tiled:tile-id 
+							 (+ first-gid
+							    (cl-tiled:tile-id
 							     (cl-tiled:cell-tile cell))))
 			    (let* ((cell-column (cl-tiled:cell-column cell))
 				   (cell-row (cl-tiled:cell-row cell)))
 			      (multiple-value-bind (texture atlas)
 				  (get-map-texture-and-atlas asset-manager index texture-name)
-				(let* ((clipped-src-rectangle (clip-rect-src 
+				(let* ((clipped-src-rectangle (clip-rect-src
 							       (make-rectangle :x (* 32 cell-column)
 									       :y (* 32 cell-row)
 									       :w 32
 									       :h 32)
 							       camera-rectangle))
-				       (src-rect (sdl2:make-rect 
+				       (src-rect (sdl2:make-rect
 						  (+ (car atlas) (rectangle-x clipped-src-rectangle))
 						  (+ (cadr atlas) (rectangle-y clipped-src-rectangle))
-						  (rectangle-w clipped-src-rectangle) 
+						  (rectangle-w clipped-src-rectangle)
 						  (rectangle-h clipped-src-rectangle)))
-				       (dst-rect (sdl2:make-rect (+ 
+				       (dst-rect (sdl2:make-rect (+
 								  (- (* 32 cell-column)
 								     (camera-x camera))
 								  (- 32 (rectangle-w clipped-src-rectangle)))
@@ -239,7 +250,7 @@
 								  (- (* 32 cell-row)
 								     (camera-y camera))
 								  (- 32 (rectangle-h clipped-src-rectangle)))
-								 (rectangle-w clipped-src-rectangle) 
+								 (rectangle-w clipped-src-rectangle)
 								 (rectangle-h clipped-src-rectangle))))
 				  (sdl2:render-copy-ex renderer
 						       texture
@@ -248,3 +259,72 @@
 						       :angle 0
 						       :center (sdl2:make-point 0 0)
 						       :flip nil)))))))))))
+
+
+
+(defmethod scene/do-action ((scene <scene-zelda>) code act)
+  (let* ((actionmap (scene-actionmap scene))
+	 (caction (gethash code actionmap))
+	 (player (scene-zelda-player scene))
+	 (player-input (entity-input player)))
+    (when (not (null caction))
+      (cond ((string= act "START")
+	     (cond ((string= caction "LEFT")
+		    (setf (cinput-left player-input) T))
+		   ((string= caction "RIGHT")
+		    (setf (cinput-right player-input) T))
+		   ((string= caction "UP")
+		    (setf (cinput-up player-input) T))
+		   ((string= caction "DOWN")
+		    (setf (cinput-down player-input) T))))
+	    ((string= act "STOP")
+	     (cond ((string= caction "LEFT")
+		    (setf (cinput-left player-input) nil))
+		   ((string= caction "RIGHT")
+		    (setf (cinput-right player-input) nil))
+		   ((string= caction "UP")
+		    (setf (cinput-up player-input) nil))
+		   ((string= caction "DOWN")
+		    (setf (cinput-down player-input) nil))))))))
+
+
+
+(defun scene-zelda/do-input (scene)
+  (let* ((player (scene-zelda-player scene))
+	 (player-input (entity-input player))
+	 (player-movement (entity-movement player))
+	 (speed 60)
+	 (init-vec2 (make-vec2 :x 0 :y 0)))
+    (when (cinput-up player-input)
+      (setf init-vec2 (vec2+ init-vec2 (make-vec2 :x 0 :y -1))))
+    (when (cinput-down player-input)
+      (setf init-vec2 (vec2+ init-vec2 (make-vec2 :x 0 :y 1))))
+    (when (cinput-left player-input)
+      (setf init-vec2 (vec2+ init-vec2 (make-vec2 :x -1  :y 0))))
+    (when (cinput-right player-input)
+      (setf init-vec2 (vec2+ init-vec2 (make-vec2 :x 1 :y 0))))
+    (let ((norm (vec2-scale (vec2-normalize init-vec2) speed)))
+      (setf (cmovement-x player-movement) (vec2-x norm))
+      (setf (cmovement-y player-movement) (vec2-y norm)))))
+    
+
+(defun scene-zelda/do-movement (scene dt)
+  (let* ((float-dt (/ dt 1000))
+	 (entities-movement-position
+	   (remove-if-not
+	    #'(lambda (entity)
+		(and
+		 (entity-movement entity)
+		 (entity-position entity)))
+	    (entity-manager/get-entities (scene-entity-manager scene) nil))))
+    (loop for entity in entities-movement-position do
+      (let ((position (entity-position entity))
+	    (movement (entity-movement entity)))
+	(setf (cposition-x position) 
+	      (+ (cposition-x position)
+		 (* (cmovement-x movement) float-dt)))
+	(setf (cposition-y position) 
+	      (+ (cposition-y position)
+		 (* (cmovement-y movement) float-dt)))))))
+	    
+		      

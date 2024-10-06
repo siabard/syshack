@@ -13,6 +13,40 @@
 	(delta-y (abs (- (vec2-y v1) (vec2-y v2)))))
     (make-vec2 :x delta-x :y delta-y)))
 
+
+
+;; vec2 의 각 성분을 n배 증가시킨 벡터를 얻기 
+(defun vec2-scale (v n)
+  (let ((x (vec2-x v))
+	(y (vec2-y v)))
+    (make-vec2 :x (* n x)
+	       :y (* n y))))
+
+;; vec2 size
+;; 벡터의 크기
+(defun vec2-size (v)
+  (let ((x (vec2-x v))
+	(y (vec2-y v)))
+    (sqrt (+ (* x x) (* y y)))))
+
+;; vec2  normalize
+;; normalize는 각 x, y 벡터 성분을 벡터의 크기로 나눈 것이다.
+;; (x / |v|, y / |v|)
+(defun vec2-normalize (v)
+  (let* ((x (vec2-x v))
+	 (y (vec2-y v))
+	 (s (vec2-size v)))
+    (cond ((= s 0)
+	   (make-vec2 :x 0 :y 0))
+	  (t (make-vec2 :x (/ x s)
+			:y (/ y s))))))
+
+(defun vec2+ (v1 v2)
+  (make-vec2 :x (+ (vec2-x v1)
+		   (vec2-x v2))
+	     :y (+ (vec2-y v1)
+		   (vec2-y v2))))
+
 ;; rectangle 은 다음과 같다.
 ;; (make-rectangle x y w h)
 (defstruct rectangle
@@ -146,8 +180,8 @@
 
 
 (defun rectangle-to-sdl-rect (rectangle)
-  (let ((x (rectangle-x rectangle))
-	(y (rectangle-y rectangle))
-	(w (rectangle-w rectangle))
-	(h (rectangle-h rectangle)))
+  (let ((x (floor (rectangle-x rectangle)))
+	(y (floor (rectangle-y rectangle)))
+	(w (floor (rectangle-w rectangle)))
+	(h (floor (rectangle-h rectangle))))
     (sdl2:make-rect x y w h)))

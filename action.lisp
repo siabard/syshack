@@ -4,7 +4,8 @@
   ((name :accessor caction-name
 	 :initarg :name)
    (act :accessor caction-act
-	:initarg :act)
+	:initarg :act
+	:documentation "START or STOP")
    (pos :accessor caction-pos
 	:initarg :pos
 	:initform nil)))

@@ -68,6 +68,12 @@
    (position :accessor entity-position
 	     :initarg :position
 	     :initform nil)
+   (movement :accessor entity-movement
+	     :initarg :movement
+	     :initform nil)
+   (input :accessor entity-input
+	  :initarg :input
+	  :initform nil)
    (alive? :accessor entity-alive?
 	   :initarg :alive?
 	   :initform T
