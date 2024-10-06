@@ -172,12 +172,12 @@
 				:h atlas-h)
 		camera-rectangle))
 	     (src-rect (sdl2:make-rect
-			(+ atlas-x
-			   (rectangle-x clipped-src-rectangle))
-			(+ atlas-y
-			   (rectangle-y clipped-src-rectangle))
-			(rectangle-w clipped-src-rectangle)
-			(rectangle-h clipped-src-rectangle)))
+			(floor (+ atlas-x
+				  (rectangle-x clipped-src-rectangle)))
+			(floor (+ atlas-y
+				  (rectangle-y clipped-src-rectangle)))
+			(floor (rectangle-w clipped-src-rectangle))
+			(floor (rectangle-h clipped-src-rectangle))))
 	     (dst-rect (sdl2:make-rect (floor (+
 					       (- (cposition-x cposition)
 						  (camera-x camera))
@@ -186,8 +186,8 @@
 					       (- (cposition-y cposition)
 						  (camera-y camera))
 					       (- atlas-h (rectangle-h clipped-src-rectangle))))
-				       (rectangle-w clipped-src-rectangle)
-				       (rectangle-h clipped-src-rectangle))))
+				       (floor (rectangle-w clipped-src-rectangle))
+				       (floor (rectangle-h clipped-src-rectangle)))))
 
 	(scene-zelda/render-map scene)
 	(sdl2:render-copy-ex renderer texture-texture
