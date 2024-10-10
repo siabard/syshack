@@ -1,4 +1,4 @@
-(in-package #:syshack)
+\(in-package #:syshack)
 
 ;; 도움함수 모음 (CFFI 등 포함)
 

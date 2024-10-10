@@ -122,7 +122,7 @@
 	 (animation (gethash current-animation animations)) ;; <animation>
 	 (texture-name (animation-texture-name animation))
 	 (texture-asset (asset-manager-textures asset-manager))
-	 (texture (gethash texture-asset texture-name))
+	 (texture (gethash texture-name texture-asset))
 	 (atlas (ctexture-atlas texture))
 	 (current-frame-atlas (aref atlas current-frame)))
     current-frame-atlas))
@@ -139,5 +139,32 @@
 	 (current-frame-atlas (entity/get-current-animation-atlas entity asset-manager)))
     (make-rectangle :x (cposition-x cposition)
 		    :y (cposition-y cposition)
-		    :w (aref current-frame-atlas 2)
-		    :h (aref current-frame-atlas 3))))
+		    :w (caddr current-frame-atlas)
+		    :h (cadddr current-frame-atlas ))))
+
+
+(defun entity/get-prev-bound-rect (entity asset-manager)
+  (let* ((cposition (entity-position entity))
+	 (current-frame-atlas (entity/get-current-animation-atlas entity asset-manager)))
+    (make-rectangle :x (cposition-prev-x cposition)
+		    :y (cposition-prev-y cposition)
+		    :w (caddr current-frame-atlas)
+		    :h (cadddr current-frame-atlas))))
+
+;;;; entity 의 pos 을 이용해 
+;;;; 겹쳐진 영역을 검사하기 
+(defun entity/position-overlap (e1 e2 asset-manager)
+  (let* ((r1 (entity/get-bound-rect e1 asset-manager))
+	 (r2 (entity/get-bound-rect e2 asset-manager)))
+    (overlap-amount r1 r2)))
+
+
+;;;; entity 의 prev pos 을 이용해 
+;;;; 겹쳐진 영역을 검사하기 
+(defun entity/position-prev-overlap (e1 e2 asset-manager)
+  (let* ((r1 (entity/get-prev-bound-rect e1 asset-manager))
+	 (r2 (entity/get-prev-bound-rect e2 asset-manager)))
+    (overlap-amount r1 r2)))
+
+
+	 	 

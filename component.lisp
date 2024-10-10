@@ -7,13 +7,24 @@
       :initform 0)
    (y :accessor cposition-y
       :initarg :y
-      :initform 0)))
+      :initform 0)
+   (prev-x :accessor cposition-prev-x
+	   :initarg :prev-x
+	   :initform 0)
+   (prev-y :accessor cposition-prev-y
+	   :initarg :prev-y
+	   :initform 0)))
 
 
 (defun make-position-component (x y)
   (make-instance '<cposition>
 		 :x x 
-		 :y y))
+		 :y y
+		 :prev-x x
+		 :prev-y y))
+
+
+
 
 ;;;; 크기 size
 (defclass <csize> ()

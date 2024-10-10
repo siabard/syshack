@@ -94,6 +94,7 @@
 (defmethod scene/update ((scene <scene-zelda>) dt)
   (scene-zelda/do-input scene)
   (scene-zelda/do-movement scene dt)
+  (scene-zelda/do-collision scene)
   (let* ((entities (entity-manager/get-entities (scene-entity-manager scene) nil)))
     (system/animation entities dt)))
 
@@ -218,7 +219,7 @@
 
     (loop for layer in layers-omit-collision
 	  do (let* ((cells (clip-layer-with-camera camera layer)))
-	       (loop for cell in cells
+	       (loop for cell in cells 
 		     do (let* ((first-gid (cl-tiled:tileset-first-gid
 					   (cl-tiled:tile-tileset
 					    (cl-tiled:cell-tile cell)))))
@@ -320,6 +321,10 @@
     (loop for entity in entities-movement-position do
       (let ((position (entity-position entity))
 	    (movement (entity-movement entity)))
+	(setf (cposition-prev-x position)
+	      (cposition-x position))
+	(setf (cposition-prev-y position)
+	      (cposition-y position))
 	(setf (cposition-x position) 
 	      (+ (cposition-x position)
 		 (* (cmovement-x movement) float-dt)))
@@ -328,3 +333,39 @@
 		 (* (cmovement-y movement) float-dt)))))))
 	    
 		      
+
+(defun scene-zelda/do-collision (scene-zelda)
+  (let* ((game (scene-game scene-zelda))
+	 (player (scene-zelda-player scene-zelda))
+	 (asset-manager (game-asset-manager game))
+	 (map-table (get-map-from-game game))
+	 (current-map (gethash "level1" map-table))
+	 (layers (tiled-map-layers current-map))
+	 (layers-collision (remove-if-not #'(lambda (layer)
+					       (string=
+						(cl-tiled:layer-name layer)
+						"collision"))
+					   layers)))
+
+    ;; MAP 레이어와 충돌확인
+    (loop for layer in layers-collision
+	  do (let* ((cells (cl-tiled:layer-cells layer)))
+	       (loop for cell in cells 
+		     do (let* ((cell-column (cl-tiled:cell-column cell))
+			       (cell-row (cl-tiled:cell-row cell))
+			       (cell-rect (make-rectangle 
+					   :x (* cell-column 32)
+					   :y (* cell-row 32)
+					   :w 32
+					   :h 32))
+			       (player-rect (entity/get-bound-rect player asset-manager))
+			       (coll-amount (overlap-amount 
+					     player-rect cell-rect)))
+			  (when (and
+				 (> (vec2-x coll-amount) 0)
+				 (> (vec2-y coll-amount) 0))
+			    (format t "~A ~A~%" 
+				    (vec2-x coll-amount) 
+				    (vec2-y coll-amount)))))))))
+				
+			
