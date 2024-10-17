@@ -63,6 +63,7 @@
 			    (animations (asset-manager-animations am))
 			    (animation-component (make-animation-component T))
 			    (canimations (canimation-animations animation-component))
+			    (size-component (make-size-component 16 16))
 			    (moveleft (gethash "moveleft" animations))
 			    (moveright (gethash "moveright" animations))
 			    (input (make-input-component))
@@ -76,19 +77,49 @@
 		       (setf (entity-animation player) animation-component)
 		       (setf (entity-movement player) movement)
 		       (setf (entity-input player) input)
-		       (setf (entity-position player) position-component)))		  
+		       (setf (entity-position player) position-component)
+		       (setf (entity-size player) size-component)))
 		    ((string= cate "map")
 		     (let* ((map-name (nth 1 splited))
 			    (map-path (nth 2 splited))
 			    (game-map (make-tiled-map am map-path)))
-		       (setf (gethash map-name (scene-zelda-gamemap scene)) game-map)))
-
+		       (setf (gethash map-name (scene-zelda-gamemap scene)) game-map)
+		       ;; collision 이라 설정된 영역은 collider에 추가함..
+		       (let* ((layers (tiled-map-layers game-map))
+			      (layers-collision (remove-if-not #'(lambda (layer)
+								   (string=
+								    (cl-tiled:layer-name layer)
+								    "collision"))
+							       layers)))
+			 (loop for layer in layers-collision
+			       do (let* ((cells (cl-tiled:layer-cells layer)))
+				    (loop for cell in cells 
+					  do (let* ((cell-column (cl-tiled:cell-column cell))
+						    (cell-row (cl-tiled:cell-row cell))
+						    (x (* cell-column 32))
+						    (y (* cell-row 32))
+						    (w 32)
+						    (h 32))
+					       (scene-zelda/register-collision em
+ 									       (make-position-component x y) 
+									       (make-size-component w h)))))))))
 		    (t nil))))
     (scene/register-action scene 80 "LEFT")
     (scene/register-action scene 79 "RIGHT")
     (scene/register-action scene 81 "DOWN")
     (scene/register-action scene 82 "UP")
     (close in)))
+
+
+;;; entities 에 collision 맵 타일을 더한다.
+;;; collision map tile은 entity로 취급할 수 있도록 한다.
+;;; entity name 은 tile, tag는 coll 로 한다.
+(defun scene-zelda/register-collision  (entity-manager pos-comp size-comp)
+  (let* ((entity-name "tile")
+	 (entity-tag "coll")
+	 (cell (entity-manager/add-entity entity-manager entity-tag entity-name)))
+    (setf (entity-position cell) pos-comp)
+    (setf (entity-size cell) size-comp)))
 
 ;;;; update
 (defmethod scene/update ((scene <scene-zelda>) dt)
@@ -128,9 +159,6 @@
 	      (t
 	       (setf (canimation-current-time canimation)
 		     next-animation-current-time)))))))
-
-
-
 
 
 ;;;; render
@@ -307,7 +335,7 @@
     (let ((norm (vec2-scale (vec2-normalize init-vec2) speed)))
       (setf (cmovement-x player-movement) (vec2-x norm))
       (setf (cmovement-y player-movement) (vec2-y norm)))))
-    
+
 
 (defun scene-zelda/do-movement (scene dt)
   (let* ((float-dt (/ dt 1000))
@@ -331,41 +359,39 @@
 	(setf (cposition-y position) 
 	      (+ (cposition-y position)
 		 (* (cmovement-y movement) float-dt)))))))
-	    
-		      
+
+
 
 (defun scene-zelda/do-collision (scene-zelda)
-  (let* ((game (scene-game scene-zelda))
-	 (player (scene-zelda-player scene-zelda))
-	 (asset-manager (game-asset-manager game))
-	 (map-table (get-map-from-game game))
-	 (current-map (gethash "level1" map-table))
-	 (layers (tiled-map-layers current-map))
-	 (layers-collision (remove-if-not #'(lambda (layer)
-					       (string=
-						(cl-tiled:layer-name layer)
-						"collision"))
-					   layers)))
-
-    ;; MAP 레이어와 충돌확인
-    (loop for layer in layers-collision
-	  do (let* ((cells (cl-tiled:layer-cells layer)))
-	       (loop for cell in cells 
-		     do (let* ((cell-column (cl-tiled:cell-column cell))
-			       (cell-row (cl-tiled:cell-row cell))
-			       (cell-rect (make-rectangle 
-					   :x (* cell-column 32)
-					   :y (* cell-row 32)
-					   :w 32
-					   :h 32))
-			       (player-rect (entity/get-bound-rect player asset-manager))
-			       (coll-amount (overlap-amount 
-					     player-rect cell-rect)))
-			  (when (and
-				 (> (vec2-x coll-amount) 0)
-				 (> (vec2-y coll-amount) 0))
-			    (format t "~A ~A~%" 
-				    (vec2-x coll-amount) 
-				    (vec2-y coll-amount)))))))))
-				
+  (let* ((player (scene-zelda-player scene-zelda))
+	 (entity-manager (scene-entity-manager scene-zelda))
+	 (player-pos (entity-position player))
+	 (colliders (entity-manager/get-entities entity-manager "coll")))
+    ;; Collision entity와의 충돌확인
+    (loop for collider in colliders
+	  do (let* ((collision-direction (entity/collide-direction player collider))
+		    (coll-amount (entity/position-overlap player collider)))
+	       (when (and
+		      (> (vec2-x coll-amount) 0)
+		      (> (vec2-y coll-amount) 0))
+		 (when (string= collision-direction 'up)
+		   (setf (cposition-y player-pos) 
+			 (+ (cposition-y player-pos) 
+			    (vec2-y coll-amount))))
+		 (when (string= collision-direction 'down)
+		   (setf (cposition-y player-pos)
+			 (- (cposition-y player-pos) 
+			    (vec2-y coll-amount))))
+		 (when (string= collision-direction 'left)
+		   (setf (cposition-x player-pos) 
+			 (+ (cposition-x player-pos)
+			    (vec2-x coll-amount))))
+		 (when (string= collision-direction 'right)
+		   (setf (cposition-x player-pos)
+			 (- (cposition-x player-pos)
+			    (vec2-x coll-amount)))))))))
 			
+		 
+								 
+
+

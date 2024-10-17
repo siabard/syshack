@@ -46,7 +46,7 @@
 	 (entity-manager-entities entity-manager))
 	(t
 	 (remove-if-not #'(lambda (entity)
-			    (string= (entity-name entity) tag))
+			    (string= (entity-tag entity) tag))
 			(entity-manager-entities entity-manager)))))
 
 (defclass <entity> ()
@@ -65,6 +65,9 @@
    (animation :accessor entity-animation
 	      :initarg :animation
 	      :initform nil)
+   (size :accessor entity-size
+	 :initarg :size
+	 :initform nil)
    (position :accessor entity-position
 	     :initarg :position
 	     :initform nil)
@@ -98,6 +101,9 @@
 (defmethod entity/add-animation (entity animation)
   (setf (entity-animation entity) animation))
 
+(defun entity/set-size (entity x y)
+  (let ((size (make-size-component x y)))
+    (setf (entity-size entity) size)))
 
 ;;; entity에서 현재 animation의 현재 프레임관련 animation 정보를
 ;;; 반환한다.
@@ -130,41 +136,65 @@
 ;;; entity 에서 component를 통해 영역이 있는지 여부와
 ;;; 해당 영역 정보를 가져오기
 ;;; 해당 영역은 position 컴포넌트와 animation 으로 결정된다.
-(defgeneric entity/get-bound-rect (entity asset-manager)
+(defgeneric entity/get-bound-rect (entity)
   (:documentation "entity 에 대한 bound 영역을 계산해서 알려준다."))
 
 ;;; bound box는 rectangle 형태이어야한다.
-(defmethod entity/get-bound-rect (entity asset-manager)
+(defmethod entity/get-bound-rect (entity)
   (let* ((cposition (entity-position entity))
-	 (current-frame-atlas (entity/get-current-animation-atlas entity asset-manager)))
+	 (csize (entity-size entity)))
     (make-rectangle :x (cposition-x cposition)
 		    :y (cposition-y cposition)
-		    :w (caddr current-frame-atlas)
-		    :h (cadddr current-frame-atlas ))))
+		    :w (csize-w csize)
+		    :h (csize-h csize))))
 
 
-(defun entity/get-prev-bound-rect (entity asset-manager)
+(defun entity/get-prev-bound-rect (entity)
   (let* ((cposition (entity-position entity))
-	 (current-frame-atlas (entity/get-current-animation-atlas entity asset-manager)))
+	 (csize (entity-size entity)))
     (make-rectangle :x (cposition-prev-x cposition)
 		    :y (cposition-prev-y cposition)
-		    :w (caddr current-frame-atlas)
-		    :h (cadddr current-frame-atlas))))
+		    :w (csize-w csize)
+		    :h (csize-h csize))))
 
 ;;;; entity 의 pos 을 이용해 
 ;;;; 겹쳐진 영역을 검사하기 
-(defun entity/position-overlap (e1 e2 asset-manager)
-  (let* ((r1 (entity/get-bound-rect e1 asset-manager))
-	 (r2 (entity/get-bound-rect e2 asset-manager)))
+(defun entity/position-overlap (e1 e2)
+  (let* ((r1 (entity/get-bound-rect e1))
+	 (r2 (entity/get-bound-rect e2)))
     (overlap-amount r1 r2)))
 
 
 ;;;; entity 의 prev pos 을 이용해 
 ;;;; 겹쳐진 영역을 검사하기 
-(defun entity/position-prev-overlap (e1 e2 asset-manager)
-  (let* ((r1 (entity/get-prev-bound-rect e1 asset-manager))
-	 (r2 (entity/get-prev-bound-rect e2 asset-manager)))
+(defun entity/position-prev-overlap (e1 e2)
+  (let* ((r1 (entity/get-prev-bound-rect e1))
+	 (r2 (entity/get-prev-bound-rect e2)))
     (overlap-amount r1 r2)))
 
 
-	 	 
+
+;;;; 어떤 방향으로 겹쳤는지 반환하기
+(defun entity/collide-direction (e1 e2)
+  (let* ((ol (entity/position-overlap e1 e2))
+	 (pol (entity/position-prev-overlap e1 e2))
+	 (c1 (rectangle-center (entity/get-bound-rect e1)))
+	 (c2 (rectangle-center (entity/get-bound-rect e2)))
+	 (ol-x (vec2-x ol))
+	 (ol-y (vec2-y ol))
+	 (pol-x (vec2-x pol))
+	 (pol-y (vec2-y pol)))
+    (cond ((and (> ol-x 0)
+		(> ol-y 0))
+	   (cond ((and (> pol-x 0)
+		       (<= pol-y 0))
+		  (cond ((> (vec2-y c1) (vec2-y c2))
+			 'up)
+			(t 'down)))
+		 ((and (<= pol-x 0)
+		       (> pol-y 0))
+		  (cond ((> (vec2-x c1) (vec2-x c2))
+			 'left)
+			(t 'right)))
+		 (t 'none)))
+	  (t 'none))))
