@@ -14,6 +14,8 @@
 (defun scene/make-zelda (game)
   (let* ((em (make-entity-manager))
 	 (camera (make-camera "default" 16 16 640 480)))
+    (setf (camera-max-x camera) 2000)
+    (setf (camera-max-y camera) 1000)
     (make-instance '<scene-zelda>
 		   :name "zelda"
 		   :game game
@@ -93,7 +95,7 @@
 							       layers)))
 			 (loop for layer in layers-collision
 			       do (let* ((cells (cl-tiled:layer-cells layer)))
-				    (loop for cell in cells 
+				    (loop for cell in cells
 					  do (let* ((cell-column (cl-tiled:cell-column cell))
 						    (cell-row (cl-tiled:cell-row cell))
 						    (x (* cell-column 32))
@@ -101,7 +103,7 @@
 						    (w 32)
 						    (h 32))
 					       (scene-zelda/register-collision em
- 									       (make-position-component x y) 
+ 									       (make-position-component x y)
 									       (make-size-component w h)))))))))
 		    (t nil))))
     (scene/register-action scene 80 "LEFT")
@@ -127,7 +129,8 @@
   (scene-zelda/do-movement scene dt)
   (scene-zelda/do-collision scene)
   (let* ((entities (entity-manager/get-entities (scene-entity-manager scene) nil)))
-    (system/animation entities dt)))
+    (system/animation entities dt))
+  (scene-zelda/do-camera scene dt))
 
 
 ;;;; animation system
@@ -247,7 +250,7 @@
 
     (loop for layer in layers-omit-collision
 	  do (let* ((cells (clip-layer-with-camera camera layer)))
-	       (loop for cell in cells 
+	       (loop for cell in cells
 		     do (let* ((first-gid (cl-tiled:tileset-first-gid
 					   (cl-tiled:tile-tileset
 					    (cl-tiled:cell-tile cell)))))
@@ -267,20 +270,20 @@
 									       :h 32)
 							       camera-rectangle))
 				       (src-rect (sdl2:make-rect
-						  (+ (car atlas) (rectangle-x clipped-src-rectangle))
-						  (+ (cadr atlas) (rectangle-y clipped-src-rectangle))
-						  (rectangle-w clipped-src-rectangle)
-						  (rectangle-h clipped-src-rectangle)))
-				       (dst-rect (sdl2:make-rect (+
-								  (- (* 32 cell-column)
-								     (camera-x camera))
-								  (- 32 (rectangle-w clipped-src-rectangle)))
-								 (+
-								  (- (* 32 cell-row)
-								     (camera-y camera))
-								  (- 32 (rectangle-h clipped-src-rectangle)))
-								 (rectangle-w clipped-src-rectangle)
-								 (rectangle-h clipped-src-rectangle))))
+						  (floor (+ (car atlas) (rectangle-x clipped-src-rectangle)))
+						  (floor (+ (cadr atlas) (rectangle-y clipped-src-rectangle)))
+						  (floor (rectangle-w clipped-src-rectangle))
+						  (floor (rectangle-h clipped-src-rectangle))))
+				       (dst-rect (sdl2:make-rect (floor (+
+									 (- (* 32 cell-column)
+									    (camera-x camera))
+									 (- 32 (rectangle-w clipped-src-rectangle))))
+								 (floor (+
+									 (- (* 32 cell-row)
+									    (camera-y camera))
+									 (- 32 (rectangle-h clipped-src-rectangle))))
+								 (floor (rectangle-w clipped-src-rectangle))
+								 (floor (rectangle-h clipped-src-rectangle)))))
 				  (sdl2:render-copy-ex renderer
 						       texture
 						       :source-rect src-rect
@@ -353,10 +356,10 @@
 	      (cposition-x position))
 	(setf (cposition-prev-y position)
 	      (cposition-y position))
-	(setf (cposition-x position) 
+	(setf (cposition-x position)
 	      (+ (cposition-x position)
 		 (* (cmovement-x movement) float-dt)))
-	(setf (cposition-y position) 
+	(setf (cposition-y position)
 	      (+ (cposition-y position)
 		 (* (cmovement-y movement) float-dt)))))))
 
@@ -375,23 +378,43 @@
 		      (> (vec2-x coll-amount) 0)
 		      (> (vec2-y coll-amount) 0))
 		 (when (string= collision-direction 'up)
-		   (setf (cposition-y player-pos) 
-			 (+ (cposition-y player-pos) 
+		   (setf (cposition-y player-pos)
+			 (+ (cposition-y player-pos)
 			    (vec2-y coll-amount))))
 		 (when (string= collision-direction 'down)
 		   (setf (cposition-y player-pos)
-			 (- (cposition-y player-pos) 
+			 (- (cposition-y player-pos)
 			    (vec2-y coll-amount))))
 		 (when (string= collision-direction 'left)
-		   (setf (cposition-x player-pos) 
+		   (setf (cposition-x player-pos)
 			 (+ (cposition-x player-pos)
 			    (vec2-x coll-amount))))
 		 (when (string= collision-direction 'right)
 		   (setf (cposition-x player-pos)
 			 (- (cposition-x player-pos)
 			    (vec2-x coll-amount)))))))))
-			
-		 
-								 
 
 
+(defun scene-zelda/do-camera (scene-zelda dt)
+  (let* ((camera (scene-zelda-camera scene-zelda))
+	 (player (scene-zelda-player scene-zelda))
+	 (player-movement (entity-movement player))
+	 (player-pos (entity-position player))
+	 (pos (make-vec2 :x (cposition-x player-pos)
+			 :y (cposition-y player-pos)))
+	 (vdir (cond ((< 0
+			 (cmovement-y player-movement))
+		      'up)
+		     ((> 0
+			 (cmovement-y player-movement))
+		      'down)
+		     (t 'none)))
+	 (hdir (cond ((< 0
+			 (cmovement-x player-movement))
+		      'left)
+		     ((> 0
+			 (cmovement-x player-movement))
+		      'right)
+		     (t 'none))))
+    (camera/follow camera pos vdir hdir)
+    (camera/update camera dt)))
