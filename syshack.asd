@@ -1,9 +1,9 @@
 ;;;; syshack.asd
 
 (asdf:defsystem #:syshack
-  :description "Describe syshack here"
-  :author "Your Name <your.name@example.com>"
-  :license  "Specify license here"
+  :description "Top view RPG themed system hacking"
+  :author "Yeonho Jang<siabard@gmail.com>"
+  :license  "MIT"
   :version "0.0.1"
   :serial t
   :depends-on (#:sdl2 #:sdl2-image #:sdl2-mixer #:swank #:imago #:cl-ppcre #:cl-tiled #:arrows)
