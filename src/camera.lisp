@@ -93,9 +93,9 @@
     (when (or (not (equal camera-x target-x))
 	      (not (equal camera-y target-y)))
       (setf (camera-x camera)
-	    (- (camera-x camera)
-	       (/ (* delta-x dt) 1000)))
+	    (floor (- (camera-x camera)
+		      (/ (* delta-x dt) 1000))))
       (setf (camera-y camera)
-	    (- (camera-y camera)
-	       (/ (* delta-y dt) 1000))))))
+	    (floor (- (camera-y camera)
+		      (/ (* delta-y dt) 1000)))))))
     
