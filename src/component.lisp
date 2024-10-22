@@ -120,3 +120,23 @@
 (defun make-state-component (name)
   (make-instance '<cstate>
 		 :name name))
+
+;;;; facing
+(defclass <cfacing> ()
+  ((hdir :initarg :hdir
+	 :accessor cfacing-hdir
+	 :initform 'none)
+   (vdir :initarg :vdir
+	 :accessor cfacing-vdir
+	 :initform 'none)))
+
+(defun make-facing-component ()
+  (make-instance '<cfacing>
+		 :hdir 'none
+		 :vdir 'none))
+
+(defun cfacing/set-vdir (cfacing vdir)
+  (setf (cfacing-vdir cfacing) vdir))
+
+(defun cfacing/set-hdir (cfacing hdir)
+  (setf (cfacing-hdir cfacing) hdir))

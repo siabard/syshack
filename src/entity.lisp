@@ -80,8 +80,10 @@
    (alive? :accessor entity-alive?
 	   :initarg :alive?
 	   :initform T
-	   :type boolean))
-
+	   :type boolean)
+   (facing :accessor entity-facing
+	   :initarg :facing
+	   :initform 'nil))
   (:documentation "Entity class"))
 
 (defun make-entity (tag name)
