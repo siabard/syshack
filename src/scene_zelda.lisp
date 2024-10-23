@@ -14,8 +14,8 @@
 (defun scene/make-zelda (game)
   (let* ((em (make-entity-manager))
 	 (camera (make-camera "default" 16 16 640 480)))
-    (setf (camera-max-x camera) 2000)
-    (setf (camera-max-y camera) 1000)
+    (setf (camera-max-x camera) 2000
+	  (camera-max-y camera) 1000)
     (make-instance '<scene-zelda>
 		   :name "zelda"
 		   :game game
@@ -49,10 +49,10 @@
 			    (canimations (canimation-animations animation-component))
 			    (new-entity (entity-manager/add-entity em entity-tag entity-name)))
 		       (setf (gethash animation-name canimations)
-			     (gethash animation-name animations))
-		       (setf (canimation-current-animation animation-component) animation-name)
-		       (setf (entity-animation new-entity) animation-component)
-		       (setf (entity-position new-entity) position-component)))
+			     (gethash animation-name animations)
+			     (canimation-current-animation animation-component) animation-name
+			     (entity-animation new-entity) animation-component
+			     (entity-position new-entity) position-component)))
 
 
 		    ((string= cate "player")
@@ -73,16 +73,16 @@
 			    (facing (make-facing-component))
 			    (player (entity-manager/add-entity em entity-tag entity-name)))
 
-		       (setf (scene-zelda-player scene) player)
-		       (setf (gethash "moveleft" canimations) moveleft)
-		       (setf (gethash "moveright" canimations) moveright)
-		       (setf (canimation-current-animation animation-component) "moveleft")
-		       (setf (entity-animation player) animation-component)
-		       (setf (entity-movement player) movement)
-		       (setf (entity-input player) input)
-		       (setf (entity-position player) position-component)
-		       (setf (entity-facing player) facing)
-		       (setf (entity-size player) size-component)))
+		       (setf (scene-zelda-player scene) player
+			     (gethash "moveleft" canimations) moveleft
+			     (gethash "moveright" canimations) moveright
+			     (canimation-current-animation animation-component) "moveleft"
+			     (entity-animation player) animation-component
+			     (entity-movement player) movement
+			     (entity-input player) input
+			     (entity-position player) position-component
+			     (entity-facing player) facing
+			     (entity-size player) size-component)))
 		    ((string= cate "map")
 		     (let* ((map-name (nth 1 splited))
 			    (map-path (nth 2 splited))
