@@ -140,3 +140,15 @@
 
 (defun cfacing/set-hdir (cfacing hdir)
   (setf (cfacing-hdir cfacing) hdir))
+
+;;;; trigger
+(defclass <ctrigger> ()
+  ((on-enter :initarg :on-enter
+	     :accessor ctrigger-on-enter
+	     :initform nil)
+   (on-exit :initarg :on-exit
+	    :accessor ctrigger-on-exit
+	    :initform nil)))
+
+(defun make-trigger-component ()
+  (make-instance '<ctrigger>))

@@ -83,7 +83,10 @@
 	   :type boolean)
    (facing :accessor entity-facing
 	   :initarg :facing
-	   :initform 'nil))
+	   :initform 'nil)
+   (trigger :accessor entity-trigger
+	    :initarg :trigger
+	    :initform 'nil))
   (:documentation "Entity class"))
 
 (defun make-entity (tag name)

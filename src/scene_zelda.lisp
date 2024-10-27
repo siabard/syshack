@@ -112,6 +112,19 @@
     (scene/register-action scene 79 "RIGHT")
     (scene/register-action scene 81 "DOWN")
     (scene/register-action scene 82 "UP")
+
+    ;; 특정 영역에 trigger 설치하기 (trigger entity)
+    (let* ((entity-name "move-trigger")
+	   (entity-tag "trigger")
+	   (size-component (make-size-component 32 32))
+	   (pos (make-position-component (* 8 32) (* 8 32)))
+	   (action (make-caction "teleport" 'move-to :pos (make-vec2 :x (* 7 32) :y (* 7 32))))
+	   (teleport-trigger (make-trigger-component))
+	   (trigger (entity-manager/add-entity em entity-tag entity-name)))
+      (setf (ctrigger-on-enter teleport-trigger) (list action)
+	    (entity-position trigger) pos
+	    (entity-size trigger) size-component
+	    (entity-trigger trigger) teleport-trigger))
     (close in)))
 
 
@@ -129,7 +142,8 @@
 (defmethod scene/update ((scene <scene-zelda>) dt)
   (scene-zelda/do-input scene)
   (scene-zelda/do-movement scene dt)
-  (scene-zelda/do-collision scene)
+  ;;(scene-zelda/do-collision scene)
+  (scene-zelda/do-trigger scene)
   (let* ((entities (entity-manager/get-entities (scene-entity-manager scene) nil)))
     (system/animation entities dt))
   (scene-zelda/do-camera scene dt))
@@ -400,6 +414,29 @@
 		   (setf (cposition-x player-pos)
 			 (- (cposition-x player-pos)
 			    (vec2-x coll-amount)))))))))
+
+(defun scene-zelda/do-trigger (scene-zelda)
+  (let* ((player (scene-zelda-player scene-zelda))
+	 (entity-manager (scene-entity-manager scene-zelda))
+	 (player-pos (entity-position player))
+	 (triggers (entity-manager/get-entities entity-manager "trigger")))
+    ;; trigger 와의 충돌확인 
+    (loop for trigger in triggers
+	  do (let* ((coll-amount (entity/position-overlap player trigger)))
+	       (when (and
+		      (> (vec2-x coll-amount) 0)
+		      (> (vec2-y coll-amount) 0))
+		 (let* ((trigger-component (entity-trigger trigger))
+			(enter-triggers (ctrigger-on-enter trigger-component)))
+		   (when (not (null enter-triggers))
+		     (loop for enter-trigger in enter-triggers
+			   do (let* ((act (caction-act enter-trigger))
+				     (pos (caction-pos enter-trigger)))
+				(cond ((string= act 'move-to)
+				       (setf (cposition-x player-pos) (vec2-x pos)
+					     (cposition-y player-pos) (vec2-y pos)))))
+
+		 ))))))))
 
 
 (defun scene-zelda/do-camera (scene-zelda dt)
