@@ -24,7 +24,10 @@
 			     (:file "util")
 			     (:file "gamemap")
 			     (:file "tiled")
+			     (:file "text")
 			     (:file "global")
 			     (:file "scene")
 			     (:file "scene_zelda")
-			     (:file "game")))))
+			     (:file "game")))
+	       (:module "gui"
+		:components ((:file "panel"))))

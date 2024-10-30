@@ -24,12 +24,12 @@
 ;; atlas 정보를 생성한다.
 ;; atlas 정보는 리스트의 배열이어야한다  ((x y w h) .... )
 (defun make-atlas (tile-width tile-height col row)
-  (let ((atlas-list (loop for y from 0 to (- row 1) 
-			  append (loop for x from 0 to (- col 1) 
-				       collect  (list (* x tile-width)
-						      (* y tile-height)
-						      tile-width
-						      tile-height)))))
+  (let ((atlas-list (loop :for y :from 0 :to (- row 1) 
+			  :append (loop :for x :from 0 :to (- col 1) 
+					:collect  (list (* x tile-width)
+							(* y tile-height)
+							tile-width
+							tile-height)))))
     (make-array (length atlas-list) :initial-contents atlas-list)))
 	     
 

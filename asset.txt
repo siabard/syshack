@@ -5,3 +5,4 @@ map default resources/map/tiled.tmx
 bitmap player resources/bitmap/mychar.png 16 16
 animation moveleft player 0 3
 animation moveright player 13 3
+bitmap panel resources/bitmap/panel.png 3 3

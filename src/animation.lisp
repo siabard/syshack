@@ -12,12 +12,12 @@
 	   :initform '())
    (frame-length :accessor animation-frame-length
 		 :initarg :frame-length)))
-		
+
 (defun make-animation (name texture-name start-frame frame-length)
   (let* ((last-frame (- (+ start-frame frame-length) 1))
 	 (frames (loop for i from start-frame below last-frame collect i)))
-  (make-instance '<animation>
-		 :name name
-		 :texture-name texture-name
-		 :frames frames
-		 :frame-length frame-length)))
+    (make-instance '<animation>
+		   :name name
+		   :texture-name texture-name
+		   :frames frames
+		   :frame-length frame-length)))

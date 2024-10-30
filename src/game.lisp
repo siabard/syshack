@@ -25,6 +25,9 @@
 	     :documentation "Game's window renderer")
    (key-input :accessor game-key-input
 	      :initarg :key-input)
+   (panel :accessor game-panel
+	  :initform nil
+	  :initarg :panel)
    (window :accessor game-window
 	   :initarg :window
 	   :initform nil
@@ -82,10 +85,13 @@
 		    (t
 		     nil))))
     (close in)
-    (setf (gethash "zelda" scenes) zelda)
-    (setf (game-current-scene game) "zelda")
-    (setf *current-scene* zelda)
+    (setf (game-panel game)
+	  (make-panel (asset-manager/get-texture am "panel")))
+    (setf (gethash "zelda" scenes) zelda
+	  (game-current-scene game) "zelda"
+	  *current-scene* zelda)
     (init-keys (game-key-input game))
+
     (scene/init zelda "./resources/level/level1.txt")))
     
 
@@ -171,7 +177,8 @@
 		 :ascii-bitmap-font ascii-bitmap-font)
     (draw-string renderer  32 64 "한 / 영 혼합" 
 		 :korean-bitmap-font korean-bitmap-font
-		 :ascii-bitmap-font ascii-bitmap-font)))
+		 :ascii-bitmap-font ascii-bitmap-font)
+    (panel/render (game-panel game) renderer 80 80 100 100)))
 
 ;; game 을 종료한다.
 ;; 모든 리소스를 free 한다.
