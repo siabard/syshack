@@ -27,7 +27,12 @@
 	      :initarg :key-input)
    (panel :accessor game-panel
 	  :initform nil
-	  :initarg :panel)
+	  :initarg :panel
+	  :documentation "샘플 Panel - 나중에 지웁니다.")
+   (sprite :accessor game-sprite
+	   :initform nil
+	   :initarg :sprite
+	   :documentation "샘플 Sprite - 나중에 지웁니다.")
    (window :accessor game-window
 	   :initarg :window
 	   :initform nil
@@ -90,6 +95,9 @@
     (setf (gethash "zelda" scenes) zelda
 	  (game-current-scene game) "zelda"
 	  *current-scene* zelda)
+    (let* ((player-texture (asset-manager/get-texture am "player"))
+	   (sprite (make-sprite-from-ctexture player-texture)))
+      (setf (game-sprite game) sprite))
     (init-keys (game-key-input game))
 
     (scene/init zelda "./resources/level/level1.txt")))
@@ -164,14 +172,18 @@
 	 (fonts (asset-manager-fonts am))
 	 (ascii-bitmap-font (gethash "ascii" fonts))
 	 (korean-bitmap-font (gethash "korean" fonts))
+	 (sprite (game-sprite game))
 	 (current-scene-name (game-current-scene game))
 	 (scenes (game-scenes game))
 	 (scene (gethash current-scene-name scenes)))
     (scene/render scene)
-    (draw-hangul renderer korean-bitmap-font)
+    (sprite/render sprite renderer 
+		   :dest-rect (sdl2:make-rect 0 0 16 16))
+    (draw-hangul renderer korean-bitmap-font (color-to-byte 255 0 0 255))
     (draw-string renderer  32 32 "안녕하세요" 
 		 :korean-bitmap-font korean-bitmap-font
-		 :ascii-bitmap-font ascii-bitmap-font)
+		 :ascii-bitmap-font ascii-bitmap-font
+		 :color (color-to-byte 0 255 0 255))
     (draw-string renderer  32 48 "This is text" 
 		 :korean-bitmap-font korean-bitmap-font
 		 :ascii-bitmap-font ascii-bitmap-font)

@@ -11,7 +11,9 @@
                (:file "syshack")
 	       (:module "src"
 		:components ((:file "action")
+			     (:file "color")
 			     (:file "asset_manager")
+			     (:file "sprite")
 			     (:file "physics")
 			     (:file "key")
 			     (:file "entity")
@@ -30,4 +32,6 @@
 			     (:file "scene_zelda")
 			     (:file "game")))
 	       (:module "gui"
-		:components ((:file "panel"))))
+		:components ((:file "gui")
+			     (:file "panel")
+			     (:file "dialog-window")))))

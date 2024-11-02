@@ -4,23 +4,23 @@
 (in-package #:syshack)
 
 ;; 파라미터 image 의 x, y 위치의 값을 읽어들인다.
+;; 데이터의 값은 rgba 가 각각 1바이트씩 차지한 값이다.
 (defun get-pixel-value (image x y)
   (multiple-value-bind (a r g b)
       (imago:color-argb (imago:image-pixel image x y))
-    (+ (ash r 24)
-       (ash g 16)
-       (ash b 8)
-       a)))
+    (color-to-byte r g b a)))
 
 ;; 이미지의 x, y, w, h 위치의 pixel을 pointer 영역으로
 ;; 전달한다.
-(defun write-pixel-to-pointer (image pixels x y w h &optional chrom)
+(defun write-pixel-to-pointer (image pixels x y w h &optional chrom color)
   (dotimes (j h)
     (dotimes (i w)
       (let* ((p (+ i (* j w)))
-	     (c (get-pixel-value image (+ x i) (+ j y))))
+	     (c (get-pixel-value image (+ x i) (+ j y)))
+	     (color (cond ((null color) c)
+			  (t color))))
 	(unless (equal chrom c)
-	  (setf (cffi:mem-ref pixels :uint32 (* 4 p)) c))))))
+	  (setf (cffi:mem-ref pixels :uint32 (* 4 p)) color))))))
 
 
 ;; 지정한 char-code 에 맞추어 폰트를 가져온다.
@@ -32,7 +32,7 @@
     (list q r)))
 
 ;; 아스키 폰트를 pixels 포인터 공간에 넣기
-(defun write-font-to-pointer (image pixels charcode &optional chrom)
+(defun write-font-to-pointer (image pixels charcode &optional chrom color)
   (multiple-value-bind (row col) (floor charcode 16)
     (let ((width 8)
 	  (height 16))
@@ -42,10 +42,11 @@
 			      (* height row)
 			      width
 			      height
-			      chrom))))
+			      chrom
+			      color))))
 
 ;; 한글 폰트를 pixels 포인터 공간에 넣기
-(defun write-hangul-font-to-pointer (image pixels charcode)
+(defun write-hangul-font-to-pointer (image pixels charcode &optional color)
   (let* ((jaso (han-jaso charcode))
 	 (jaso-cho (car jaso))
 	 (jaso-mid (cadr jaso))
@@ -62,14 +63,16 @@
 			    (* bul-cho height)
 			    width
 			    height
-			    0)
+			    0
+			    color)
     (write-pixel-to-pointer image
 			    pixels
 			    (* jaso-mid width)
 			    (+ (* 8 height) (* bul-mid height))
 			    width
 			    height
-			    0)
+			    0
+			    color)
     (when bul-jong
       (write-pixel-to-pointer image
 			      pixels
@@ -77,7 +80,8 @@
 			      (+ (* 12 height) (* bul-jong height))
 			      width
 			      height
-			      0))))
+			      0
+			      color))))
 
 
 ;;; 한글 여부 확인
@@ -107,7 +111,7 @@
 
 ;;; 텍스트를 출력하는 기능
 ;;; 한글인 경우와 아스키에 따른 경우를 모두 계산할 것
-(defun draw-string (renderer x y texts &key korean-bitmap-font ascii-bitmap-font (sx 1) (sy 1))
+(defun draw-string (renderer x y texts &key korean-bitmap-font ascii-bitmap-font (sx 1) (sy 1) (color nil))
   (let* ((charcodes (mapcar #'char-code (coerce texts 'list)))
 	 (text-offset 0)
 	 (texture (sdl2:create-texture renderer
@@ -122,7 +126,8 @@
 	       (memset pixels 0 (* 16 16 4))
 	       (write-hangul-font-to-pointer korean-bitmap-font
 					     pixels
-					     charcode)
+					     charcode
+					     color)
 	       (sdl2:update-texture texture
 				    (sdl2:make-rect 0 0 16 16)
 				    pixels
@@ -147,7 +152,8 @@
 	       (memset pixels 0 (* 8 16 4))
 	       (write-font-to-pointer ascii-bitmap-font
 				      pixels
-				      charcode)
+				      charcode
+				      color)
 	       (sdl2:update-texture texture
 				    (sdl2:make-rect 0 0 8 16)
 				    pixels
@@ -171,7 +177,7 @@
 
 
 ;; 한글을 출력해보기
-(defun draw-hangul (renderer bitmap-font)
+(defun draw-hangul (renderer bitmap-font &optional color)
   (let ((texture (sdl2:create-texture renderer
 				      sdl2:+pixelformat-rgba8888+
 				      sdl2-ffi:+sdl-textureaccess-target+
@@ -181,7 +187,8 @@
       (memset pixels 0 (* 16 16 4))
       (write-hangul-font-to-pointer bitmap-font
 				    pixels
-				    #xD55C)
+				    #xD55C
+				    color)
       (sdl2:update-texture texture (sdl2:make-rect 0 0 16 16) pixels (* 16 4)))
     (sdl2:render-copy-ex renderer
 			 texture
@@ -192,7 +199,7 @@
 			 :flip nil)
     (sdl2:destroy-texture texture)))
 
-(defun draw (renderer bitmap-font)
+(defun draw (renderer bitmap-font &optional color)
   (let ((texture (sdl2:create-texture renderer
 				      sdl2:+pixelformat-rgba8888+
 				      sdl2-ffi:+sdl-textureaccess-target+
@@ -203,7 +210,8 @@
       (write-font-to-pointer bitmap-font
 			     pixels
 			     (char-code #\C)
-			     1)
+			     0
+			     color)
       (sdl2:update-texture texture (sdl2:make-rect 0 0 8 16) pixels (* 8 4)))
     (sdl2:render-copy-ex renderer
 			 texture
