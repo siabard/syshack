@@ -13,6 +13,7 @@
    (texts :initarg :texts
 	  :accessor texts)
    (avatar :initarg :avatar
+	   :initform nil
 	   :accessor avatar)
    (choice :initarg :choice
 	   :accessor choice)))
