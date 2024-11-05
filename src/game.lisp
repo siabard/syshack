@@ -33,6 +33,9 @@
 	   :initform nil
 	   :initarg :sprite
 	   :documentation "샘플 Sprite - 나중에 지웁니다.")
+   (dialog :accessor game-dialog
+	   :initform nil
+	   :initarg :dialog)
    (window :accessor game-window
 	   :initarg :window
 	   :initform nil
@@ -90,17 +93,23 @@
 		    (t
 		     nil))))
     (close in)
-    (setf (game-panel game)
-	  (make-panel (asset-manager/get-texture am "panel")))
-    (setf (gethash "zelda" scenes) zelda
-	  (game-current-scene game) "zelda"
-	  *current-scene* zelda)
-    (let* ((player-texture (asset-manager/get-texture am "player"))
+    (let* ((panel (make-panel (asset-manager/get-texture am "panel")))
+	   (dialog (make-dialog-window 120 60 240 140 panel "test"
+				       '("우리는 미래를 위해 움직여야합니다."
+					 "새로운 게임 세상을 만들 것입니다."
+					 "놀라운 미래가 기다립니다.")
+				       nil nil)))
+      (setf (game-panel game) panel
+	    (game-dialog game) dialog
+	    (gethash "zelda" scenes) zelda
+	    (game-current-scene game) "zelda"
+	    *current-scene* zelda)
+      (let* ((player-texture (asset-manager/get-texture am "player"))
 	   (sprite (make-sprite-from-ctexture player-texture)))
-      (setf (game-sprite game) sprite))
-    (init-keys (game-key-input game))
-
-    (scene/init zelda "./resources/level/level1.txt")))
+	(setf (game-sprite game) sprite))
+      (init-keys (game-key-input game))
+      
+      (scene/init zelda "./resources/level/level1.txt"))))
     
 
 
@@ -190,7 +199,10 @@
     (draw-string renderer  32 64 "한 / 영 혼합" 
 		 :korean-bitmap-font korean-bitmap-font
 		 :ascii-bitmap-font ascii-bitmap-font)
-    (panel/render (game-panel game) renderer 80 80 100 100)))
+    (panel/render (game-panel game) renderer 80 80 100 100)
+    (dialog-window/render (game-dialog game) renderer 
+			  :korean-bitmap-font korean-bitmap-font
+			  :ascii-bitmap-font ascii-bitmap-font)))
 
 ;; game 을 종료한다.
 ;; 모든 리소스를 free 한다.

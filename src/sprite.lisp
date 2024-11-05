@@ -26,6 +26,13 @@
 		 :atlases atlases)))
 
 
+(defun sprite/get-width-height (sprite &key (index 0))
+  (let* ((atlases (sprite-atlases sprite))
+	 (atlas (aref atlases index)))
+    (values (caddr atlas)
+	    (cadddr atlas))))
+ 	 
+
 
 ;;;; sprite rendering 한다.
 (defun sprite/render (sprite renderer &key dest-rect (index 0))
