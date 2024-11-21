@@ -112,6 +112,8 @@
     (scene/register-action scene 79 "RIGHT")
     (scene/register-action scene 81 "DOWN")
     (scene/register-action scene 82 "UP")
+    (scene/register-action scene 7 "DIALOG")
+    (scene/register-action scene 21 "RUNNING")
 
     ;; 특정 영역에 trigger 설치하기 (trigger entity)
     (let* ((entity-name "move-trigger")
@@ -140,13 +142,15 @@
 
 ;;;; update
 (defmethod scene/update ((scene <scene-zelda>) dt)
-  (scene-zelda/do-input scene)
-  (scene-zelda/do-movement scene dt)
-  ;;(scene-zelda/do-collision scene)
-  (scene-zelda/do-trigger scene)
-  (let* ((entities (entity-manager/get-entities (scene-entity-manager scene) nil)))
-    (system/animation entities dt))
-  (scene-zelda/do-camera scene dt))
+  (let* ((current-mode (scene-mode scene)))
+    (scene-zelda/do-input scene)
+    (when (string= 'running current-mode)
+      (scene-zelda/do-movement scene dt))
+    (scene-zelda/do-collision scene)
+    (scene-zelda/do-trigger scene)
+    (let* ((entities (entity-manager/get-entities (scene-entity-manager scene) nil)))
+      (system/animation entities dt))
+    (scene-zelda/do-camera scene dt)))
 
 
 ;;;; animation system
@@ -315,6 +319,7 @@
 	 (caction (gethash code actionmap))
 	 (player (scene-zelda-player scene))
 	 (player-input (entity-input player)))
+    (format t "~A~%" code)
     (when (not (null caction))
       (cond ((string= act "START")
 	     (cond ((string= caction "LEFT")
@@ -324,7 +329,15 @@
 		   ((string= caction "UP")
 		    (setf (cinput-up player-input) T))
 		   ((string= caction "DOWN")
-		    (setf (cinput-down player-input) T))))
+		    (setf (cinput-down player-input) T))
+		   ((string= caction "DIALOG")
+		    (format t "DIALOG MODE~%")
+		    (setf (scene-mode scene) 'dialog))
+		   ((string= caction "RUNNING")
+		    (format t "RUNNING MODE~%")
+		    (setf (scene-mode scene) 'running))))
+		    
+	    
 	    ((string= act "STOP")
 	     (cond ((string= caction "LEFT")
 		    (setf (cinput-left player-input) nil))

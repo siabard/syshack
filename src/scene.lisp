@@ -1,5 +1,9 @@
 (in-package #:syshack)
 
+;;;; scene 은 각 상태별로 동작 방식이 조금씩 다르다.
+;;;; 공통적으로는 화면에 rendering을 하여야한다.
+;;;; DIALOG 시에는 대화관련한 SYSTEM만 동작한다.
+;;;; RUNNING 시에는 조작관련 SYSTEM만 동작한다.
 (defclass <scene> ()
   ((name :accessor scene-name
 	 :initarg :name
@@ -9,7 +13,11 @@
    (actionmap :accessor scene-actionmap
 	      :initform (make-hash-table :test 'equal))
    (entity-manager :accessor scene-entity-manager
-		   :initarg :entity-manager)))
+		   :initarg :entity-manager)
+   (mode :accessor scene-mode
+	 :initarg :mode
+	 :initform 'running
+	 :documentation " 'DIALOG, 'RUNNING 등 각 상황에 대한 설정  ")))
 
 
 ;; init scene
