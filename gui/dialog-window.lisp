@@ -52,9 +52,17 @@
 		   :choice choice)))
 
 ;; 현재 index 를 하나 늘려 다음 위치로 이동  
+;; 다음으로 이동하면 해당 인덱스를, 더이상 진행하지 못한다면 nil 읇 반환한다.
 (defun dialog-window/next (dw)
-  (setf (dialog-window-index dw) 
-	(+ 1 (dialog-window-index dw) )))
+  (let* ((current-index (dialog-window-index dw))
+	 (next-index (+ current-index 1))
+	 (dialog-length (length (dialog-window-texts dw))))
+    (cond ((< next-index dialog-length)
+	   (setf (dialog-window-index dw)
+		 next-index)
+	   next-index)
+	  (t nil))))
+	  
 
 ;; 렌더링
 (defun dialog-window/render (dw renderer &key korean-bitmap-font ascii-bitmap-font)

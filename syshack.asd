@@ -6,7 +6,7 @@
   :license  "MIT"
   :version "0.0.1"
   :serial t
-  :depends-on (#:sdl2 #:sdl2-image #:sdl2-mixer #:swank #:imago #:cl-ppcre #:cl-tiled #:arrows)
+  :depends-on (#:sdl2 #:sdl2-image #:sdl2-mixer #:swank #:imago #:cl-ppcre #:cl-tiled #:arrows )
   :components ((:file "package")
                (:file "syshack")
 	       (:module "src"
@@ -28,6 +28,7 @@
 			     (:file "tiled")
 			     (:file "text")
 			     (:file "global")
+			     (:file "dialog")
 			     (:file "scene")
 			     (:file "scene_zelda")
 			     (:file "game")))
