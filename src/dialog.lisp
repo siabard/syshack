@@ -78,7 +78,7 @@
   (let* ((vertices (graph-vertices graph)))
     (remove-if-not #'(lambda (v) 
 		       (let* ((vid (vertex-id v)))
-			 (equal vid id)))
+			 (string= vid id)))
 		   vertices)))
 
 (defun vertex-has-edges-to (vertex to-id)
