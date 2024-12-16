@@ -30,7 +30,7 @@
 
 (defun add-edge (graph from-id to-id label)
   "그래프에서 특정 정점 사이에 간선을 추가합니다."
-  (let ((from-vertex (find from-id (graph-vertices graph) :key #'vertex-id :test #'equal)))
+  (let ((from-vertex (find from-id (graph-vertices graph) :key #'vertex-id :test #'string=)))
     (when from-vertex
       (push (make-edge :to to-id :label label) (vertex-edges from-vertex)))))
 
@@ -56,7 +56,7 @@
     
     ;; 간선 추가
     (add-edge g 'start 'choice1 "선택지")
-    (add-edge g 'choice1 'result1 "네")
+    (add-edge g "CHOICE1" 'result1 "네")
     (add-edge g 'choice1 'result2 "아니요")
     
     g))
@@ -78,7 +78,7 @@
   (let* ((vertices (graph-vertices graph)))
     (remove-if-not #'(lambda (v) 
 		       (let* ((vid (vertex-id v)))
-			 (equal vid id)))
+			 (string= vid id)))
 		   vertices)))
 
 (defun vertex-has-edges-to (vertex to-id)
