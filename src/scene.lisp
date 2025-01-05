@@ -24,6 +24,9 @@
 (defgeneric scene/init (scene path)
   (:documentation "Scene 초기화"))
 
+;; save scene
+(defgeneric scene/save (scene path))
+
 ;; update
 (defgeneric scene/update (scene dt)
   (:documentation "Update scene with dt"))

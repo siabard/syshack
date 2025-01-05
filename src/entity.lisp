@@ -14,11 +14,11 @@
 (defun make-entity-manager ()
   (make-instance '<entity-manager>))
 
-(defgeneric entity-manager/add-entity (entity-manager tag name)
+(defgeneric entity-manager/add-entity (entity-manager cate tag name)
   (:documentation "add entity to entity-manager"))
 
-(defmethod entity-manager/add-entity ((entity-manager <entity-manager>) tag name)
-  (let* ((new-entity (make-entity tag name))
+(defmethod entity-manager/add-entity ((entity-manager <entity-manager>) cate tag name)
+  (let* ((new-entity (make-entity cate tag name))
 	 (added-entities (entity-manager-added-entities entity-manager)))
     (setf (entity-manager-added-entities entity-manager) (cons new-entity added-entities))
     new-entity))
@@ -53,6 +53,9 @@
   ((sequence :accessor entity-sequence
 	     :initform 0
 	     :allocation :class)
+   (cate :accessor entity-cate 
+	 :initarg :cate
+	 :type string)
    (id :accessor entity-id
        :initarg :id
        :initform 0)
@@ -89,8 +92,9 @@
 	    :initform 'nil))
   (:documentation "Entity class"))
 
-(defun make-entity (tag name)
+(defun make-entity (cate tag name)
   (let* ((new-entity (make-instance '<entity>
+				    :cate cate
 				    :name name
 				    :tag tag))
 	 (sequence (entity-sequence new-entity))

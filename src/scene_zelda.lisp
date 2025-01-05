@@ -23,7 +23,44 @@
 		   :camera camera
 		   :entity-manager em)))
 
+;;;; 저장하기
+;;;; Scene의 entity / player / map 정보를 저장한다.
+(defmethod scene/save((scene <scene-zelda>) path)
+  (let* ((em (scene-entity-manager scene))
+	 (entities (entity-manager-entities em)))
+    (with-open-file (f path
+		       :direction :output
+		       :if-exists :supersede
+		       :if-does-not-exist :create)
+      (loop :for entity :in entities 
+	    :do (cond ((string= "entity" (entity-cate entity))
+		       (let* ((position (entity-position entity))
+			      (animation (entity-animation entity))
+			      (animation-name (canimation-current-animation animation))
+			      (gx (floor (cposition-x position) 16))
+			      (gy (floor (cposition-y position) 16)))
+			  (format f "~A ~A ~A ~A ~A ~A~%"
+				  (entity-cate entity)
+				  (entity-name entity)
+				  (entity-tag entity)
+				  animation-name
+				  gx
+				  gy)
+			  f))
+		      ((string= "player" (entity-cate entity))
+		       (let* ((position (entity-position entity))
+			      (gx (floor (cposition-x position) 16))
+			      (gy (floor (cposition-y position) 16)))
+			  (format f "~A ~A ~A ~A ~A~%"
+				  (entity-cate entity)
+				  (entity-name entity)
+				  (entity-tag entity)
+				  gx
+				  gy)
+			 )))))))
+				  
 
+  
 
 ;;;; 초기화하기
 (defmethod scene/init ((scene <scene-zelda>) path)
@@ -47,7 +84,7 @@
 			    (animations (asset-manager-animations am))
 			    (animation-component (make-animation-component T))
 			    (canimations (canimation-animations animation-component))
-			    (new-entity (entity-manager/add-entity em entity-tag entity-name)))
+			    (new-entity (entity-manager/add-entity em cate entity-tag entity-name)))
 		       (setf (gethash animation-name canimations)
 			     (gethash animation-name animations)
 			     (canimation-current-animation animation-component) animation-name
@@ -71,7 +108,7 @@
 			    (input (make-input-component))
 			    (movement (make-movement-component 0 0))
 			    (facing (make-facing-component))
-			    (player (entity-manager/add-entity em entity-tag entity-name)))
+			    (player (entity-manager/add-entity em cate entity-tag entity-name)))
 
 		       (setf (scene-zelda-player scene) player
 			     (gethash "moveleft" canimations) moveleft
@@ -113,6 +150,7 @@
     (scene/register-action scene 81 "DOWN")
     (scene/register-action scene 82 "UP")
     (scene/register-action scene 7 "DIALOG")
+    (scene/register-action scene 22 "SAVE")
     (scene/register-action scene 21 "RUNNING")
 
     ;; 특정 영역에 trigger 설치하기 (trigger entity)
@@ -122,7 +160,7 @@
 	   (pos (make-position-component (* 8 32) (* 8 32)))
 	   (action (make-caction "teleport" 'move-to :pos (make-vec2 :x (* 7 32) :y (* 7 32))))
 	   (teleport-trigger (make-trigger-component))
-	   (trigger (entity-manager/add-entity em entity-tag entity-name)))
+	   (trigger (entity-manager/add-entity em "trigger" entity-tag entity-name)))
       (setf (ctrigger-on-enter teleport-trigger) (list action)
 	    (entity-position trigger) pos
 	    (entity-size trigger) size-component
@@ -136,7 +174,7 @@
 (defun scene-zelda/register-collision  (entity-manager pos-comp size-comp)
   (let* ((entity-name "tile")
 	 (entity-tag "coll")
-	 (cell (entity-manager/add-entity entity-manager entity-tag entity-name)))
+	 (cell (entity-manager/add-entity entity-manager "collision" entity-tag entity-name)))
     (setf (entity-position cell) pos-comp)
     (setf (entity-size cell) size-comp)))
 
@@ -346,7 +384,9 @@
 		   ((string= caction "UP")
 		    (setf (cinput-up player-input) nil))
 		   ((string= caction "DOWN")
-		    (setf (cinput-down player-input) nil))))))))
+		    (setf (cinput-down player-input) nil))
+		   ((string= caction "SAVE")
+		    (scene/save scene "./saves/zelda.txt"))))))))
 
 
 
@@ -396,7 +436,7 @@
 	(setf (cposition-y position)
 	      (+ (cposition-y position)
 		 (* (cmovement-y movement) float-dt)))))))
-
+ 
 
 
 (defun scene-zelda/do-collision (scene-zelda)
