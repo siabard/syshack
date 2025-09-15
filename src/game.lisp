@@ -201,7 +201,7 @@
     (draw-string renderer  32 64 "한 / 영 혼합" 
 		 :korean-bitmap-font korean-bitmap-font
 		 :ascii-bitmap-font ascii-bitmap-font)
-    (panel/render (game-panel game) renderer 80 80 100 100)
+    ;;(panel/render (game-panel game) renderer 80 80 100 100)
     (dialog-window/render (game-dialog game) renderer 
 			  :korean-bitmap-font korean-bitmap-font
 			  :ascii-bitmap-font ascii-bitmap-font)))

@@ -30,9 +30,9 @@
 			     (:file "global")
 			     (:file "dialog")
 			     (:file "scene")
+			     (:file "gui")
 			     (:file "scene_zelda")
 			     (:file "game")))
 	       (:module "gui"
-		:components ((:file "gui")
-			     (:file "panel")
+		:components ((:file "panel")
 			     (:file "dialog-window")))))
