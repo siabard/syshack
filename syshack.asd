@@ -31,9 +31,9 @@
 			     (:file "dialog_loader")
 			     (:file "dialog")
 			     (:file "scene")
+			     (:file "gui")
 			     (:file "scene_zelda")
 			     (:file "game")))
 	       (:module "gui"
-		:components ((:file "gui")
-			     (:file "panel")
+		:components ((:file "panel")
 			     (:file "dialog-window")))))

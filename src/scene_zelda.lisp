@@ -395,7 +395,7 @@
 	 (player-input (entity-input player))
 	 (player-movement (entity-movement player))
 	 (player-facing (entity-facing player))
-	 (speed 60)
+	 (speed 160)
 	 (init-vec2 (make-vec2 :x 0 :y 0)))
     (when (cinput-up player-input)
       (cfacing/set-vdir player-facing 'up)
