@@ -1,0 +1,25 @@
+# #은 주석으로 이 줄은 무시된다.
+
+# DEFINE 섹션은 대화의 구조를 설명한다.
+# DIALOGUE_ID ENTITY_ID(SPEAKER)  OPTIONs(OTHER DIALOGUE_IDs)
+
+DIALOGUE
+
+DLG_001 ENT_001 DLG_002 DLG_003
+DLG_002 ENT_002
+DLG_003 ENT_003
+
+
+# DATA 섹션은 대화의 내용을 설명한다.
+# DIALOGUE_ID TEXTS
+
+
+DATA
+
+DLG_001 어서와 뭘 원해?
+DLG_002 맛있지
+DLG_003 맛없지
+
+# END 는 더이상 내용이 없음을 의미한다.
+
+END

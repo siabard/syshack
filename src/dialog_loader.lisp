@@ -1,0 +1,22 @@
+(in-package #:syshack)
+
+(defun load_dialog (path)
+  (let* ((in (open path))
+	 (state nil))
+    (loop :for line = (read-line in nil)
+	  :while line do
+	    (let* ((splited (cl-ppcre:split "\\s+" line))
+		   (cate (car splited)))
+	      (cond ((string= cate "DEFINE")
+		     (setf state 'DEFINE)
+		     (format t "DEFINE~%"))		    
+		    ((string= cate "#")
+		     nil)
+		    ((string= cate "DATA")
+		     (setf state 'DATE)
+		     (format t "DATA~%"))		   
+		    ((string= cate "END")
+		     (setf state 'END)
+		     (format t "END~%"))
+		    (t nil))))))
+			      
