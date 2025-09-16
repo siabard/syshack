@@ -28,6 +28,7 @@
 			     (:file "tiled")
 			     (:file "text")
 			     (:file "global")
+			     (:file "dialog_loader")
 			     (:file "dialog")
 			     (:file "scene")
 			     (:file "scene_zelda")
