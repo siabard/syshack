@@ -7,9 +7,9 @@
    (dialogs :initarg :dialogs
 	    :accessor dialogs)))
 
-(defun make-gui-managerr ()
+(defun make-gui-manager ()
   (let ((panels (make-hash-table :test 'equal))
-	(dialogs (make-hash-table :test :equal)))
+	(dialogs (make-hash-table :test 'equal)))
     (make-instance '<gui-manager>
 		   :panels panels
 		   :dialogs dialogs)))
@@ -41,7 +41,9 @@
 
 
 ;; 다이얼로그 렌더링 
-(defun gui/rende-dialog (guim)
+(defun gui/render-dialog (guim renderer korean-bitmap-font ascii-bitmap-font)
   (let* ((dialogs (dialogs guim)))
     (loop for v being the hash-value in dialogs 
-	  do (dialog-window/render v))))
+	  do (dialog-window/render v renderer
+				   :korean-bitmap-font korean-bitmap-font
+				   :ascii-bitmap-font ascii-bitmap-font))))

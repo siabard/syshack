@@ -19,6 +19,9 @@
    (asset-manager :accessor game-asset-manager
 		  :initarg :asset-manager
 		  :documentation "Asset Manager")
+   (gui-manager :accessor game-gui-manager
+		:initarg :gui-manager
+		:documentation "Gui Manager")
    (renderer :accessor game-renderer
 	     :initarg :renderer
 	     :initform nil
@@ -44,6 +47,7 @@
 
 (defun make-game (name window renderer)
   (let* ((asset-manager (make-asset-manager renderer))
+	 (gui-manager (make-gui-manager))
 	 (key-input (make-key-input))
 	 (scenes (make-hash-table :test 'equal)))
     (make-instance '<game>
@@ -52,6 +56,7 @@
 		   :renderer renderer
 		   :key-input key-input
 		   :scenes scenes
+		   :gui-manager gui-manager
 		   :current-scene ""
 		   :asset-manager asset-manager)))
 
@@ -94,23 +99,22 @@
 		     nil))))
     (close in)
     (let* ((panel (make-panel (asset-manager/get-texture am "panel")))
-	   (dialog (make-dialog-window 120 60 240 140 panel "test"
-				       '("우리는 미래를 위해 움직여야합니다."
-					 "새로운 게임 세상을 만들 것입니다."
-					 "놀라운 미래가 기다립니다.")
-				       nil nil)))
-      (setf (game-panel game) panel
-	    (game-dialog game) dialog
-	    (gethash "zelda" scenes) zelda
+	   (guim (game-gui-manager game)))
+      (gui/add-dialog guim "t1" 120 60 240 140 panel "test"
+		      '("우리는 미래를 위해 움직여야합니다."
+			"새로운 게임 세상을 만들 것입니다."
+			"놀라운 미래가 기다립니다.")
+		      nil nil)
+      (setf (gethash "zelda" scenes) zelda
 	    (game-current-scene game) "zelda"
 	    *current-scene* zelda)
       (let* ((player-texture (asset-manager/get-texture am "player"))
-	   (sprite (make-sprite-from-ctexture player-texture)))
+	     (sprite (make-sprite-from-ctexture player-texture)))
 	(setf (game-sprite game) sprite))
       (init-keys (game-key-input game))
       
       (scene/init zelda "./resources/level/level1.txt"))))
-    
+
 
 
 (defun file-io-test (path)
@@ -180,6 +184,7 @@
 (defmethod game/render (game)
   (let* ((renderer (game-renderer game))
 	 (am (game-asset-manager game))
+	 (guim (game-gui-manager game))
 	 (fonts (asset-manager-fonts am))
 	 (ascii-bitmap-font (gethash "ascii" fonts))
 	 (korean-bitmap-font (gethash "korean" fonts))
@@ -201,10 +206,7 @@
     (draw-string renderer  32 64 "한 / 영 혼합" 
 		 :korean-bitmap-font korean-bitmap-font
 		 :ascii-bitmap-font ascii-bitmap-font)
-    ;;(panel/render (game-panel game) renderer 80 80 100 100)
-    (dialog-window/render (game-dialog game) renderer 
-			  :korean-bitmap-font korean-bitmap-font
-			  :ascii-bitmap-font ascii-bitmap-font)))
+    (gui/render-dialog guim renderer korean-bitmap-font ascii-bitmap-font)))
 
 ;; game 을 종료한다.
 ;; 모든 리소스를 free 한다.
