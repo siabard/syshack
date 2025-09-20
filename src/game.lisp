@@ -215,6 +215,8 @@
 
 (defmethod game/quit ((game <game>))
   (let* ((am (game-asset-manager game))
+	 (guim (game-gui-manager game))
 	 (key-input (game-key-input game)))
     (quit-keys key-input)
+    (gui/cleanup-dialog guim)
     (asset-manager/cleanup am)))

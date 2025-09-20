@@ -31,6 +31,11 @@
     (setf (gethash did dialogs) dialog)))
 
 
+;; 특정 다이얼로그 내역 삭제
+(defun gui/delete-dialog (guim did dialog)
+  (let* ((dialogs (dialogs guim)))
+    (remhash did dialogs)))
+
 ;; 다이얼로그 클린업 
 
 (defun gui/cleanup-dialog (guim)
